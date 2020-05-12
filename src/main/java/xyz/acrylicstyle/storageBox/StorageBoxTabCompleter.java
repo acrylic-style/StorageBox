@@ -20,10 +20,12 @@ public class StorageBoxTabCompleter implements TabCompleter {
 
     private static final List<String> emptyList = new ArrayList<>();
 
+    private static final List<String> commands = Arrays.asList("autocollect", "changetype", "new", "resetconfig", "delete", "bypass", "setamount", "extract");
+
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (args.length == 0) return Arrays.asList("autocollect", "changetype", "new", "resetconfig", "delete", "bypass", "setamount");
-        if (args.length == 1) return filterArgsList(Arrays.asList("autocollect", "changetype", "new", "resetconfig", "delete", "bypass", "setamount"), args[0]);
+        if (args.length == 0) return commands;
+        if (args.length == 1) return filterArgsList(commands, args[0]);
         return emptyList;
     }
 }

@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,6 +16,7 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
@@ -112,5 +114,16 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         if (storageBox == null) return;
         Log.info("Despawned storage box (Damage): " + storageBox.getUniqueId());
         storageBox.delete();
+    }
+
+    public static int getEmptySlots(Player p) {
+        PlayerInventory inventory = p.getInventory();
+        ItemStack[] cont = inventory.getContents();
+        int i = 0;
+        for (ItemStack item : cont)
+            if (item != null && item.getType() != Material.AIR) {
+                i++;
+            }
+        return 36 - i;
     }
 }
