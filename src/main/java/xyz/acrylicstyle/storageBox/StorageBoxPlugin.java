@@ -1,24 +1,31 @@
 package xyz.acrylicstyle.storageBox;
 
+import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
+import util.ICollectionList;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -66,10 +73,16 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         }
         storageBox.decreaseAmount();
         e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(item));
+        World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
+        TileEntity te = world.getTileEntity(new BlockPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ()));
+        if (te instanceof TileEntityContainer) {
+            ((TileEntityContainer) te).setCustomName(new ChatComponentText("Chest"));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
+        if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
         StorageBox storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack().getType());
         if (storageBox == null) return;
         int amount = e.getItem().getItemStack().getAmount();
@@ -114,6 +127,36 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         if (storageBox == null) return;
         Log.info("Despawned storage box (Damage): " + storageBox.getUniqueId());
         storageBox.delete();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockDispense(BlockDispenseEvent e) {
+        if (StorageBox.getStorageBox(e.getItem()) != null) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPrepareItemCraft(PrepareItemCraftEvent e) {
+        if (ICollectionList.asList(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).nonNull().size() != 0) e.getInventory().setResult(null);
+    }
+
+    @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent e) {
+        if (e.getInventory().getType() == InventoryType.CHEST) {
+            StorageBox storageBox = StorageBox.getStorageBox(e.getPlayer().getInventory().getItemInMainHand());
+            if (storageBox == null) return;
+            if (storageBox.getType() == null) return;
+            ItemStack[] c = e.getInventory().getContents();
+            for (int i = 0; i < c.length; i++) {
+                ItemStack is = c[i];
+                if (is == null) continue;
+                if (StorageBox.getStorageBox(is) != null) continue;
+                if (is.getType().equals(storageBox.getType())) {
+                    storageBox.setAmount(storageBox.getAmount() + is.getAmount());
+                    e.getInventory().setItem(i, null);
+                }
+            }
+            e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(e.getPlayer().getInventory().getItemInMainHand()));
+        }
     }
 
     public static int getEmptySlots(Player p) {

@@ -26,7 +26,6 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "Storage BoxにStorage Boxを格納することはできません。");
             return;
         }
-        player.getInventory().setItemInOffHand(null);
         ItemStack mainHand = player.getInventory().getItemInMainHand();
         StorageBox storageBox = StorageBox.getStorageBox(mainHand);
         if (storageBox == null) {
@@ -39,6 +38,7 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "アイテムを空にしてからもう一度実行してください。");
             return;
         }
+        player.getInventory().setItemInOffHand(null);
         storageBox.setType(offHand.getType());
         storageBox.setAmount(offHand.getAmount());
         player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(mainHand));

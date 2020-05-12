@@ -23,5 +23,8 @@ public class NewCommand extends PlayerSubCommandExecutor {
         StorageBox storageBox = StorageBox.getNewStorageBox();
         player.getInventory().addItem(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "新しいStorage Boxを作成しました。");
+        player.sendMessage(ChatColor.GREEN + " - アイテムの種類を設定するには" + ChatColor.YELLOW + "/storage changetype" + ChatColor.GREEN + "を実行してください。");
+        player.sendMessage(ChatColor.GREEN + " - 削除するには" + ChatColor.RED + "/storage delete" + ChatColor.GREEN + "を実行してください。");
+        player.sendMessage(ChatColor.GREEN + " - その他の使い方などは" + ChatColor.YELLOW + "/storage" + ChatColor.GREEN + "を見てください。");
     }
 }
