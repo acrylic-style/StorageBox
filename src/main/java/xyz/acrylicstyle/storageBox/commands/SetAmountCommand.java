@@ -13,7 +13,7 @@ public class SetAmountCommand extends PlayerOpSubCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         if (args.length == 0 || !TypeUtil.isInt(args[0])) {
-            player.sendMessage(ChatColor.RED + "Amountに数字を指定してください。");
+            player.sendMessage(ChatColor.RED + "数字を指定してください。");
             return;
         }
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
