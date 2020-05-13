@@ -29,7 +29,7 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "マイナスの値を指定することはできません。");
             return;
         }
-        if ((storageBox.getAmount() - amount) < 0) {
+        if (storageBox.getAmount() < amount) {
             player.sendMessage(ChatColor.RED + "Storage Boxに入っているアイテムが足りません。");
             return;
         }
