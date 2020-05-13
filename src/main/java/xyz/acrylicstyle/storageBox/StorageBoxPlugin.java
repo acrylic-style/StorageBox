@@ -60,11 +60,13 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent e) {
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+        boolean mainHand = true;
         StorageBox storageBox = StorageBox.getStorageBox(item);
         if (storageBox == null) {
             item = e.getPlayer().getInventory().getItemInOffHand();
             storageBox = StorageBox.getStorageBox(item);
             if (storageBox == null) return;
+            mainHand = false;
         }
         if (storageBox.isEmpty()) {
             e.getPlayer().sendMessage(ChatColor.RED + "Storage Boxが空です。");
@@ -72,7 +74,11 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
             return;
         }
         storageBox.decreaseAmount();
-        e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(item));
+        if (mainHand) {
+            e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(item));
+        } else {
+            e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(item));
+        }
         World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
         TileEntity te = world.getTileEntity(new BlockPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ()));
         if (te instanceof TileEntityContainer) {

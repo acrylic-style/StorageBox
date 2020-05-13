@@ -8,6 +8,7 @@ import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 @SubCommand(name = "new", usage = "/storage new", description = "新しいStorage Boxを作成します。")
 public class NewCommand extends PlayerSubCommandExecutor {
@@ -26,5 +27,7 @@ public class NewCommand extends PlayerSubCommandExecutor {
         player.sendMessage(ChatColor.GREEN + " - アイテムの種類を設定するには" + ChatColor.YELLOW + "/storage changetype" + ChatColor.GREEN + "を実行してください。");
         player.sendMessage(ChatColor.GREEN + " - 削除するには" + ChatColor.RED + "/storage delete" + ChatColor.GREEN + "を実行してください。");
         player.sendMessage(ChatColor.GREEN + " - その他の使い方などは" + ChatColor.YELLOW + "/storage" + ChatColor.GREEN + "を見てください。");
+        Log.info("Created new storage box by " + player.getName() + ".");
+        Log.info("UUID: " + storageBox.getUniqueId());
     }
 }
