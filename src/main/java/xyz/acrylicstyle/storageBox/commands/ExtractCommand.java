@@ -8,6 +8,7 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 @SubCommand(name = "extract", usage = "/storage extract [amount]", description = "アイテムをStorage Boxから取り出します。")
@@ -34,6 +35,9 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             return;
         }
         int i = (int) Math.ceil(amount / 64F);
+        Log.info("Empty Slots: " + StorageBoxPlugin.getEmptySlots(player));
+        Log.info("I: " + i);
+        Log.info("B: " + (StorageBoxPlugin.getEmptySlots(player) >= i));
         if (StorageBoxPlugin.getEmptySlots(player) >= i) {
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];

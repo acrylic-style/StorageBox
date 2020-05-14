@@ -22,7 +22,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import util.ICollectionList;
@@ -166,13 +165,9 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     }
 
     public static int getEmptySlots(Player p) {
-        PlayerInventory inventory = p.getInventory();
-        ItemStack[] cont = inventory.getContents();
+        ItemStack[] cont = p.getInventory().getContents();
         int i = 0;
-        for (ItemStack item : cont)
-            if (item != null && item.getType() != Material.AIR) {
-                i++;
-            }
-        return 36 - i;
+        for (ItemStack item : cont) if (item == null || item.getType() == Material.AIR) i++;
+        return i;
     }
 }
