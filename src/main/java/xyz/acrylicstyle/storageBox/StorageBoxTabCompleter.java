@@ -20,7 +20,18 @@ public class StorageBoxTabCompleter implements TabCompleter {
 
     private static final List<String> emptyList = new ArrayList<>();
 
-    private static final List<String> commands = Arrays.asList("autocollect", "changetype", "new", "resetconfig", "delete", "bypass", "setamount", "extract", "getstorage");
+    private static final List<String> commands = Arrays.asList(
+            "autocollect",
+            "changetype",
+            "new",
+            "resetconfig",
+            "delete",
+            "bypass",
+            "setamount",
+            "extract",
+            "getstorage",
+            "collct"
+    );
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
