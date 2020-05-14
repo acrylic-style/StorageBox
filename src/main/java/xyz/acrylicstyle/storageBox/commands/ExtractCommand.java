@@ -45,7 +45,7 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             for (int j = 0; j < i; j++) {
                 items[j] = new ItemStack(storageBox.getType(), ((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
             }
-            player.getInventory().addItem(items);
+            player.getInventory().addItem(items).values().forEach(is -> player.getWorld().dropItem(player.getLocation(), is));
             player.sendMessage(ChatColor.GREEN + "アイテムを" + ChatColor.RED + amount + ChatColor.GREEN + "個取り出しました。");
             player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(player.getInventory().getItemInMainHand()));
         } else {
