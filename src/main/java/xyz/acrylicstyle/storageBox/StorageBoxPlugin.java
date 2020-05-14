@@ -36,11 +36,12 @@ import java.util.logging.Logger;
 
 public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public static Logger LOGGER = Logger.getLogger("StorageBox");
-    public static ConfigProvider config = new ConfigProvider("./plugins/StorageBox/config.yml");
+    public static ConfigProvider config = null;
     public static CollectionList<UUID> bypassingPlayers = new CollectionList<>();
 
     @Override
     public void onEnable() {
+        config = new ConfigProvider("./plugins/StorageBox/config.yml");
         LOGGER.info("Registering SubCommands");
         TomeitoAPI.getInstance().registerCommands(this.getClassLoader(), "storagebox", "xyz.acrylicstyle.storageBox.commands");
         TomeitoAPI.registerTabCompleter("storagebox", new StorageBoxTabCompleter());
