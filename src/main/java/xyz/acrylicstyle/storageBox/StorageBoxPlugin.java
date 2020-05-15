@@ -25,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import util.ICollectionList;
+import xyz.acrylicstyle.storageBox.commands.CollectCommand;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -149,18 +150,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public void onInventoryOpen(InventoryOpenEvent e) {
         if (e.getInventory().getType() == InventoryType.CHEST) {
             StorageBox storageBox = StorageBox.getStorageBox(e.getPlayer().getInventory().getItemInMainHand());
-            if (storageBox == null) return;
-            if (storageBox.getType() == null) return;
-            ItemStack[] c = e.getInventory().getContents();
-            for (int i = 0; i < c.length; i++) {
-                ItemStack is = c[i];
-                if (is == null) continue;
-                if (StorageBox.getStorageBox(is) != null) continue;
-                if (is.getType().equals(storageBox.getType())) {
-                    storageBox.setAmount(storageBox.getAmount() + is.getAmount());
-                    e.getInventory().setItem(i, null);
-                }
-            }
+            if (CollectCommand.fillTo(storageBox, e.getInventory())) return;
             e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(e.getPlayer().getInventory().getItemInMainHand()));
         }
     }
