@@ -30,7 +30,7 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "setamount",
             "extract",
             "getstorage",
-            "collct"
+            "collect"
     );
 
     @Override

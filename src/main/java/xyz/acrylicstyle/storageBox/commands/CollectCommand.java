@@ -1,5 +1,6 @@
 package xyz.acrylicstyle.storageBox.commands;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -13,8 +14,12 @@ public class CollectCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
-        if (fillTo(storageBox, player.getInventory())) return;
+        if (fillTo(storageBox, player.getInventory())) {
+            player.sendMessage(ChatColor.RED + "Storage Boxを持っていないか、Storage Boxの種類が「空」です。");
+            return;
+        }
         player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(player.getInventory().getItemInMainHand()));
+        player.sendMessage(ChatColor.GREEN + "アイテムをすべてStorage Boxの中に収納しました。");
     }
 
     public static boolean fillTo(StorageBox storageBox, Inventory inventory) {
