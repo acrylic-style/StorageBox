@@ -17,15 +17,12 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import util.ICollectionList;
-import xyz.acrylicstyle.storageBox.commands.CollectCommand;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -144,8 +141,12 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPrepareItemCraft(PrepareItemCraftEvent e) {
         if (ICollectionList.asList(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).nonNull().size() != 0) e.getInventory().setResult(null);
+        ItemStack item = e.getInventory().getResult();
+        if (StorageBox.getStorageBox(item) == null) return;
+        e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
     }
 
+    /* // disabled because it sucks
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent e) {
         if (e.getInventory().getType() == InventoryType.CHEST) {
@@ -153,7 +154,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
             if (CollectCommand.fillTo(storageBox, e.getInventory())) return;
             e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(e.getPlayer().getInventory().getItemInMainHand()));
         }
-    }
+    }*/
 
     public static int getEmptySlots(Player p) {
         ItemStack[] cont = p.getInventory().getContents();

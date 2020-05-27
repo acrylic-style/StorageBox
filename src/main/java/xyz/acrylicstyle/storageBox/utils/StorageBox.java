@@ -34,7 +34,8 @@ public class StorageBox {
     }
 
     @Nullable
-    public static StorageBox getStorageBox(@NotNull ItemStack itemStack) {
+    public static StorageBox getStorageBox(@Nullable ItemStack itemStack) {
+        if (itemStack == null) return null;
         try {
             String s = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag().getString("uuid");
             if (s == null) return null;
