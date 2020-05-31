@@ -15,7 +15,7 @@ public class NewCommand extends PlayerSubCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         if (!StorageBoxPlugin.bypassingPlayers.contains(player.getUniqueId())) {
-            if (!player.getInventory().contains(Material.DIAMOND, 8) || !player.getInventory().contains(Material.CHEST, 1)) {
+            if (!player.getInventory().contains(new ItemStack(Material.DIAMOND, 8)) || !player.getInventory().contains(Material.CHEST, 1)) {
                 player.sendMessage(ChatColor.RED + "チェスト1個とダイヤ8個が必要です。");
                 return;
             }
