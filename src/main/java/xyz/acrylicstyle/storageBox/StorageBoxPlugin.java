@@ -1,11 +1,10 @@
 package xyz.acrylicstyle.storageBox;
 
-import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -23,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import util.ICollectionList;
+import xyz.acrylicstyle.paper.block.TileEntity;
+import xyz.acrylicstyle.paper.block.TileEntityContainer;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -77,10 +78,10 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         } else {
             e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(item));
         }
-        World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
-        TileEntity te = world.getTileEntity(new BlockPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ()));
+        World world = e.getBlockPlaced().getWorld();
+        TileEntity te = world.getTileEntity(e.getBlockPlaced().getLocation());
         if (te instanceof TileEntityContainer) {
-            ((TileEntityContainer) te).setCustomName(new ChatComponentText("Chest"));
+            ((TileEntityContainer) te).setCustomName(null);
         }
     }
 

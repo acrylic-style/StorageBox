@@ -1,14 +1,15 @@
 package xyz.acrylicstyle.storageBox.utils;
 
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.acrylicstyle.paper.Paper;
+import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
+import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
 import java.util.Arrays;
@@ -37,8 +38,7 @@ public class StorageBox {
     public static StorageBox getStorageBox(@Nullable ItemStack itemStack) {
         if (itemStack == null) return null;
         try {
-            String s = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag().getString("uuid");
-            if (s == null) return null;
+            String s = Paper.itemStack(itemStack).getOrCreateTag().getString("uuid");
             try {
                 return StorageBox.loadStorageBox(UUID.fromString(s));
             } catch (IllegalArgumentException e) {
@@ -101,11 +101,11 @@ public class StorageBox {
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
-        net.minecraft.server.v1_15_R1.ItemStack i = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound tag = i.getOrCreateTag();
+        ItemStackUtils is = Paper.itemStack(item);
+        NBTTagCompound tag = is.getOrCreateTag();
         tag.setString("uuid", uuid.toString());
-        i.setTag(tag);
-        item = CraftItemStack.asBukkitCopy(i);
+        is.setTag(tag);
+        item = is.getItemStack();
         return item;
     }
 
