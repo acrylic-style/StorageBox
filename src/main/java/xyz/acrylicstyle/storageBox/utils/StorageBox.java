@@ -50,17 +50,6 @@ public class StorageBox {
     }
 
     @NotNull
-    @Contract("!null -> new")
-    public static StorageBox loadStorageBox(@NotNull UUID uuid) {
-        if (StorageBoxPlugin.config.get("boxes." + uuid.toString()) == null) throw new IllegalArgumentException("StorageBox isn't defined under " + uuid.toString());
-        boolean autoCollect = StorageBoxPlugin.config.getBoolean("boxes." + uuid.toString() + ".autoCollect", true);
-        String _t = StorageBoxPlugin.config.getString("boxes." + uuid.toString() + ".type");
-        Material type = _t == null ? null : Material.getMaterial(_t);
-        int amount = StorageBoxPlugin.config.getInt("boxes." + uuid.toString() + ".amount", 0);
-        return new StorageBox(uuid, type, amount, autoCollect);
-    }
-
-    @NotNull
     @Contract("-> new")
     public static StorageBox getNewStorageBox() {
         return getNewStorageBox(null);

@@ -40,7 +40,8 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        config = new ConfigProvider("./plugins/StorageBox/config.yml");
+        LOGGER.info("Loading config");
+        config = ConfigProvider.getConfig("./plugins/StorageBox/config.yml");
         LOGGER.info("Registering SubCommands");
         TomeitoAPI.getInstance().registerCommands(this.getClassLoader(), "storagebox", "xyz.acrylicstyle.storageBox.commands");
         TomeitoAPI.registerTabCompleter("storagebox", new StorageBoxTabCompleter());
@@ -62,29 +63,30 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent e) {
+        ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+        boolean mainHand = true;
+        StorageBox storageBox = StorageBox.getStorageBox(item);
+        if (storageBox == null) {
+            item = e.getPlayer().getInventory().getItemInOffHand();
+            storageBox = StorageBox.getStorageBox(item);
+            if (storageBox == null) return;
+            mainHand = false;
+        }
+        if (storageBox.isEmpty()) {
+            e.getPlayer().sendMessage(ChatColor.RED + "Storage Boxが空です。");
+            e.setCancelled(true);
+            return;
+        }
+        boolean finalMainHand1 = mainHand;
+        StorageBox finalStorageBox = storageBox;
+        ItemStack finalItem1 = item;
         runAsync(() -> {
-            ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-            boolean mainHand = true;
-            StorageBox storageBox = StorageBox.getStorageBox(item);
-            if (storageBox == null) {
-                item = e.getPlayer().getInventory().getItemInOffHand();
-                storageBox = StorageBox.getStorageBox(item);
-                if (storageBox == null) return;
-                mainHand = false;
-            }
-            if (storageBox.isEmpty()) {
-                e.getPlayer().sendMessage(ChatColor.RED + "Storage Boxが空です。");
-                e.setCancelled(true);
-                return;
-            }
-            boolean finalMainHand = mainHand;
-            storageBox.decreaseAmount();
-            ItemStack finalItem = item;
+            finalStorageBox.decreaseAmount();
             run(() -> {
-                if (finalMainHand) {
-                    e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(finalItem));
+                if (finalMainHand1) {
+                    e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(finalItem1));
                 } else {
-                    e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(finalItem));
+                    e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(finalItem1));
                 }
             });
             World world = e.getBlockPlaced().getWorld();
@@ -98,7 +100,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
-        StorageBox storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack().getType());
+        StorageBox storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack().getType()).complete();
         if (storageBox == null) return;
         int amount = e.getItem().getItemStack().getAmount();
         Material type = e.getItem().getItemStack().getType();

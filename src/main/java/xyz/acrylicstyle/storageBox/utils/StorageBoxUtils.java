@@ -6,6 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import util.promise.Promise;
 import xyz.acrylicstyle.paper.Paper;
 import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
 import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
@@ -38,12 +39,14 @@ public final class StorageBoxUtils {
         return itemStack;
     }
 
-    public static StorageBox getStorageBoxForType(@NotNull Inventory inventory, @NotNull Material type) {
-        for (ItemStack item : inventory.getContents()) {
-            StorageBox box = StorageBox.getStorageBox(item);
-            if (box == null || !box.isAutoCollect()) continue;
-            if (box.getType() == type) return box;
-        }
-        return null;
+    public static Promise<StorageBox> getStorageBoxForType(@NotNull Inventory inventory, @NotNull Material type) {
+        return Promise.async(o -> {
+            for (ItemStack item : inventory.getContents()) {
+                StorageBox box = StorageBox.getStorageBox(item);
+                if (box == null || !box.isAutoCollect()) continue;
+                if (box.getType() == type) return box;
+            }
+            return null;
+        });
     }
 }
