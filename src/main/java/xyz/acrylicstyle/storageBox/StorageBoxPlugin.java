@@ -56,33 +56,43 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         LOGGER.info("Saved config");
     }
 
+    public void run(Runnable runnable) { Bukkit.getScheduler().runTask(this, runnable); }
+
+    public void runAsync(Runnable runnable) { Bukkit.getScheduler().runTaskAsynchronously(this, runnable); }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent e) {
-        ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-        boolean mainHand = true;
-        StorageBox storageBox = StorageBox.getStorageBox(item);
-        if (storageBox == null) {
-            item = e.getPlayer().getInventory().getItemInOffHand();
-            storageBox = StorageBox.getStorageBox(item);
-            if (storageBox == null) return;
-            mainHand = false;
-        }
-        if (storageBox.isEmpty()) {
-            e.getPlayer().sendMessage(ChatColor.RED + "Storage Boxが空です。");
-            e.setCancelled(true);
-            return;
-        }
-        storageBox.decreaseAmount();
-        if (mainHand) {
-            e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(item));
-        } else {
-            e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(item));
-        }
-        World world = e.getBlockPlaced().getWorld();
-        TileEntity te = world.getTileEntity(e.getBlockPlaced().getLocation());
-        if (te instanceof TileEntityContainer) {
-            ((TileEntityContainer) te).setCustomName(null);
-        }
+        runAsync(() -> {
+            ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+            boolean mainHand = true;
+            StorageBox storageBox = StorageBox.getStorageBox(item);
+            if (storageBox == null) {
+                item = e.getPlayer().getInventory().getItemInOffHand();
+                storageBox = StorageBox.getStorageBox(item);
+                if (storageBox == null) return;
+                mainHand = false;
+            }
+            if (storageBox.isEmpty()) {
+                e.getPlayer().sendMessage(ChatColor.RED + "Storage Boxが空です。");
+                e.setCancelled(true);
+                return;
+            }
+            boolean finalMainHand = mainHand;
+            storageBox.decreaseAmount();
+            ItemStack finalItem = item;
+            run(() -> {
+                if (finalMainHand) {
+                    e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(finalItem));
+                } else {
+                    e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(finalItem));
+                }
+            });
+            World world = e.getBlockPlaced().getWorld();
+            TileEntity te = world.getTileEntity(e.getBlockPlaced().getLocation());
+            if (te instanceof TileEntityContainer) {
+                ((TileEntityContainer) te).setCustomName(null);
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -96,16 +106,18 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         e.getItem().getItemStack().setAmount(0);
         e.getItem().remove();
         e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.9F);
-        storageBox.setAmount(storageBox.getAmount() + amount);
-        ItemStack[] c = e.getPlayer().getInventory().getContents();
-        for (int i = 0; i < c.length; i++) {
-            StorageBox box = StorageBox.getStorageBox(c[i]);
-            if (box == null) continue;
-            if ((box.getType() == null ? new Object() : box.getType()).equals(type)) {
-                e.getPlayer().getInventory().setItem(i, StorageBoxUtils.updateStorageBox(c[i]));
-                break;
+        runAsync(() -> {
+            storageBox.setAmount(storageBox.getAmount() + amount);
+            ItemStack[] c = e.getPlayer().getInventory().getContents();
+            for (int i = 0; i < c.length; i++) {
+                StorageBox box = StorageBox.getStorageBox(c[i]);
+                if (box == null) continue;
+                if ((box.getType() == null ? new Object() : box.getType()).equals(type)) {
+                    e.getPlayer().getInventory().setItem(i, StorageBoxUtils.updateStorageBox(c[i]));
+                    break;
+                }
             }
-        }
+        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
