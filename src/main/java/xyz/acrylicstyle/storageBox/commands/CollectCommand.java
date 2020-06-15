@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
@@ -18,7 +17,7 @@ public class CollectCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "Storage Boxを持っていないか、Storage Boxの種類が「空」です。");
             return;
         }
-        player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(player.getInventory().getItemInMainHand()));
+        player.getInventory().setItemInMainHand(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "アイテムをすべてStorage Boxの中に収納しました。");
     }
 

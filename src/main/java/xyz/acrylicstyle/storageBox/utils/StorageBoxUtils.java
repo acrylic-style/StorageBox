@@ -6,12 +6,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import util.Validate;
 import util.promise.Promise;
 import xyz.acrylicstyle.paper.Paper;
 import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
 import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class StorageBoxUtils {
@@ -20,12 +25,14 @@ public final class StorageBoxUtils {
     public static ItemStack updateStorageBox(ItemStack itemStack) {
         ItemStackUtils is = Paper.itemStack(itemStack);
         NBTTagCompound tag = is.getOrCreateTag();
-        String s = tag.getString("uuid");
-        is.setTag(tag);
-        itemStack = is.getItemStack();
-        StorageBox storageBox = StorageBox.loadStorageBox(UUID.fromString(s));
+        String s = tag.hasKey("uuid") ? Objects.requireNonNull(tag.get("uuid")).asString() : "";
+        if (!s.equals("")) itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(s)); // Storage box - todo: remove this later
+        StorageBox storageBox = StorageBox.getStorageBox(itemStack);
+        if (storageBox == null) return itemStack;
         itemStack.setType(storageBox.getType() == null ? Material.BARRIER : storageBox.getType());
+        Log.info("ItemStack: " + itemStack);
         ItemMeta meta = itemStack.getItemMeta();
+        Validate.notNull(meta, "meta cannot be null");
         String name;
         if (storageBox.getType() == null) {
             name = "空";
@@ -39,12 +46,13 @@ public final class StorageBoxUtils {
         return itemStack;
     }
 
-    public static Promise<StorageBox> getStorageBoxForType(@NotNull Inventory inventory, @NotNull Material type) {
+    public static Promise<Map.Entry<Integer, StorageBox>> getStorageBoxForType(@NotNull Inventory inventory, @NotNull ItemStack item) {
         return Promise.async(o -> {
-            for (ItemStack item : inventory.getContents()) {
-                StorageBox box = StorageBox.getStorageBox(item);
+            ItemStack[] c = inventory.getContents();
+            for (int i = 0; i < c.length; i++) {
+                StorageBox box = StorageBox.getStorageBox(c[i]);
                 if (box == null || !box.isAutoCollect()) continue;
-                if (box.getType() == type) return box;
+                if (box.getType() != null && new ItemStack(box.getType()).isSimilar(item)) return new AbstractMap.SimpleEntry<>(i, box);
             }
             return null;
         });

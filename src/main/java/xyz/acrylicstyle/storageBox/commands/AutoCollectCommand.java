@@ -3,7 +3,6 @@ package xyz.acrylicstyle.storageBox.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
@@ -19,7 +18,7 @@ public class AutoCollectCommand extends PlayerSubCommandExecutor {
         }
         boolean b = storageBox.isAutoCollect();
         storageBox.setAutoCollect(!b);
-        player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(player.getInventory().getItemInMainHand()));
+        player.getInventory().setItemInMainHand(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "Auto Collectを" + ChatColor.YELLOW + (!b) + ChatColor.GREEN + "にしました。");
     }
 }

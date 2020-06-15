@@ -5,17 +5,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityCombustByBlockEvent;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,8 +23,8 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -79,14 +74,13 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         }
         boolean finalMainHand1 = mainHand;
         StorageBox finalStorageBox = storageBox;
-        ItemStack finalItem1 = item;
         runAsync(() -> {
             finalStorageBox.decreaseAmount();
             run(() -> {
                 if (finalMainHand1) {
-                    e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(finalItem1));
+                    e.getPlayer().getInventory().setItemInMainHand(finalStorageBox.getItemStack());
                 } else {
-                    e.getPlayer().getInventory().setItemInOffHand(StorageBoxUtils.updateStorageBox(finalItem1));
+                    e.getPlayer().getInventory().setItemInOffHand(finalStorageBox.getItemStack());
                 }
             });
             World world = e.getBlockPlaced().getWorld();
@@ -100,52 +94,15 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
-        StorageBox storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack().getType()).complete();
+        Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack()).complete();
         if (storageBox == null) return;
         int amount = e.getItem().getItemStack().getAmount();
-        Material type = e.getItem().getItemStack().getType();
         e.setCancelled(true);
         e.getItem().getItemStack().setAmount(0);
         e.getItem().remove();
         e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.9F);
-        runAsync(() -> {
-            storageBox.setAmount(storageBox.getAmount() + amount);
-            ItemStack[] c = e.getPlayer().getInventory().getContents();
-            for (int i = 0; i < c.length; i++) {
-                StorageBox box = StorageBox.getStorageBox(c[i]);
-                if (box == null) continue;
-                if ((box.getType() == null ? new Object() : box.getType()).equals(type)) {
-                    e.getPlayer().getInventory().setItem(i, StorageBoxUtils.updateStorageBox(c[i]));
-                    break;
-                }
-            }
-        });
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onItemDespawn(ItemDespawnEvent e) {
-        StorageBox storageBox = StorageBox.getStorageBox(e.getEntity().getItemStack());
-        if (storageBox == null) return;
-        Log.info("Despawned storage box (?): " + storageBox.getUniqueId());
-        storageBox.delete();
-    }
-
-    @EventHandler
-    public void onEntityCombustByBlock(EntityCombustByBlockEvent e) {
-        if (e.getEntity().getType() != EntityType.DROPPED_ITEM) return;
-        StorageBox storageBox = StorageBox.getStorageBox(((Item) e.getEntity()).getItemStack());
-        if (storageBox == null) return;
-        Log.info("Despawned storage box (Combust): " + storageBox.getUniqueId());
-        storageBox.delete();
-    }
-
-    @EventHandler
-    public void onEntityDamageByBlock(EntityDamageByBlockEvent e) {
-        if (e.getEntity().getType() != EntityType.DROPPED_ITEM) return;
-        StorageBox storageBox = StorageBox.getStorageBox(((Item) e.getEntity()).getItemStack());
-        if (storageBox == null) return;
-        Log.info("Despawned storage box (Damage): " + storageBox.getUniqueId());
-        storageBox.delete();
+        storageBox.getValue().setAmount(storageBox.getValue().getAmount() + amount);
+        e.getPlayer().getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -157,6 +114,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public void onPrepareItemCraft(PrepareItemCraftEvent e) {
         if (ICollectionList.asList(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).nonNull().size() != 0) e.getInventory().setResult(null);
         ItemStack item = e.getInventory().getResult();
+        if (item == null) return;
         if (StorageBox.getStorageBox(item) == null) return;
         e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
     }

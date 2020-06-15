@@ -25,7 +25,6 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "changetype",
             "new",
             "resetconfig",
-            "delete",
             "bypass",
             "setamount",
             "extract",

@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
@@ -47,7 +46,7 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             }
             player.getInventory().addItem(items).values().forEach(is -> player.getWorld().dropItem(player.getLocation(), is));
             player.sendMessage(ChatColor.GREEN + "アイテムを" + ChatColor.RED + amount + ChatColor.GREEN + "個取り出しました。");
-            player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(player.getInventory().getItemInMainHand()));
+            player.getInventory().setItemInMainHand(storageBox.getItemStack());
         } else {
             player.sendMessage(ChatColor.RED + "インベントリの空きスペースが足りません。");
             player.sendMessage(ChatColor.GRAY + "(" + i + "個必要です。)");

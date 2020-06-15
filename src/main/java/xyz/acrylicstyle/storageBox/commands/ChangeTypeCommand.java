@@ -5,12 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
-
-import java.util.Objects;
 
 @SubCommand(name = "changetype", usage = "/storage changetype", description = "StorageBoxのアイテムの中身を変えます。オフハンドに変更先のアイテムを持ってください。")
 public class ChangeTypeCommand extends PlayerSubCommandExecutor {
@@ -44,8 +40,7 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
         player.getInventory().setItemInOffHand(null);
         storageBox.setType(offHand.getType());
         storageBox.setAmount(offHand.getAmount());
-        player.getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(mainHand));
+        player.getInventory().setItemInMainHand(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "Storage Boxのアイテムの種類を変更しました。");
-        Log.info("Changed storage box type to: " + Objects.requireNonNull(storageBox.getType()).name() + " (UUID: " + storageBox.getUniqueId().toString() + ")");
     }
 }
