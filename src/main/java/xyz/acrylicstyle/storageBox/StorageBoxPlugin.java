@@ -93,6 +93,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
+        if (!new ItemStack(e.getItem().getItemStack().getType()).isSimilar(e.getItem().getItemStack())) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
         Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack()).complete();
         if (storageBox == null) return;

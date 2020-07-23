@@ -44,6 +44,7 @@ public class StorageBox {
             if (!uuid.equals("")) {
                 itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(uuid)); // todo: Storage box - remove this later
                 tag = Paper.itemStack(itemStack).getOrCreateTag();
+                tag.remove("uuid");
             }
             if (!tag.hasKey("storageBoxType")) {
                 return null;
@@ -64,7 +65,7 @@ public class StorageBox {
     public static ItemStack migrateStorageBox(@NotNull ItemStack item, @NotNull UUID uuid) {
         StorageBox storageBox = loadStorageBox(uuid);
         if (storageBox != null) {
-            Log.info("Storage Box " + uuid.toString() + " was successfully migrated.");
+            //Log.info("Storage Box " + uuid.toString() + " was successfully migrated.");
             return storageBox.getItemStack();
         } else {
             return item;
@@ -75,7 +76,7 @@ public class StorageBox {
     @Nullable
     private static StorageBox loadStorageBox(@NotNull UUID uuid) {
         if (StorageBoxPlugin.config.get("boxes." + uuid.toString()) == null) return null;
-        Log.info("Migrating StorageBox: " + uuid.toString());
+        //Log.info("Migrating StorageBox: " + uuid.toString());
         boolean autoCollect = StorageBoxPlugin.config.getBoolean("boxes." + uuid.toString() + ".autoCollect", true);
         String _t = StorageBoxPlugin.config.getString("boxes." + uuid.toString() + ".type");
         Material type = _t == null ? null : Material.getMaterial(_t);
