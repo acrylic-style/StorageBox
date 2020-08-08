@@ -4,12 +4,32 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import util.ICollectionList;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SubCommand(name = "changetype", usage = "/storage changetype", description = "StorageBoxのアイテムの中身を変えます。オフハンドに変更先のアイテムを持ってください。")
 public class ChangeTypeCommand extends PlayerSubCommandExecutor {
+    private static final List<Material> WHITELIST = new ArrayList<>();
+
+    static {
+        WHITELIST.add(Material.COAL);
+        WHITELIST.add(Material.CHARCOAL);
+        WHITELIST.add(Material.DIAMOND);
+        WHITELIST.add(Material.STICK);
+        WHITELIST.add(Material.DEBUG_STICK);
+        WHITELIST.add(Material.SUGAR);
+        WHITELIST.add(Material.WHEAT_SEEDS);
+        WHITELIST.add(Material.NETHERITE_INGOT);
+        WHITELIST.addAll(ICollectionList.asList(Material.values()).filter(m -> m.name().endsWith("_DYE")));
+        WHITELIST.addAll(ICollectionList.asList(Material.values()).filter(m -> m.name().endsWith("_INGOT")));
+        WHITELIST.add(Material.REDSTONE);
+    }
+
     @Override
     public void onCommand(Player player, String[] args) {
         ItemStack offHand = player.getInventory().getItemInOffHand();
@@ -17,12 +37,12 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "オフハンドに変更先のアイテムを持ってからもう一度実行してください。");
             return;
         }
-        if (!offHand.getType().isBlock()) {
+        if (!WHITELIST.contains(offHand.getType()) && !offHand.getType().isBlock()) {
             player.sendMessage(ChatColor.RED + "Storage Boxに収納できるのはブロックのみです。");
             return;
         }
         if (StorageBox.getStorageBox(offHand) != null) {
-            player.sendMessage(ChatColor.RED + "Storage BoxにStorage Boxを格納することはできません。");
+            player.sendMessage(ChatColor.RED + "Storage BoxにStorage Boxを収納することはできません。");
             return;
         }
         ItemStack mainHand = player.getInventory().getItemInMainHand();

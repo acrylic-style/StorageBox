@@ -1,11 +1,13 @@
 package xyz.acrylicstyle.storageBox;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
+import util.ICollectionList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,18 +26,31 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "autocollect",
             "changetype",
             "new",
+            "extract",
+            "collect",
+            "settype"
+    );
+
+    private static final CollectionList<String> opCommands = new CollectionList<>(
             "resetconfig",
             "bypass",
             "setamount",
-            "extract",
-            "getstorage",
-            "collect"
-    );
+            "settype"
+    ).concat(ICollectionList.asList(commands));
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 0) return commands;
-        if (args.length == 1) return filterArgsList(commands, args[0]);
+        if (args.length == 1) {
+            return filterArgsList(sender.isOp() ? opCommands : commands, args[0]);
+        }
+        if (args.length == 2) {
+            if (sender.isOp()) {
+                if (args[0].equals("settype")) {
+                    return filterArgsList(ICollectionList.asList(Material.values()).map(Material::name).toList(), args[1]);
+                }
+            }
+        }
         return emptyList;
     }
 }

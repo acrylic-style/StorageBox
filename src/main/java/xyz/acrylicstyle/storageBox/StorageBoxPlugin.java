@@ -2,23 +2,25 @@ package xyz.acrylicstyle.storageBox;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import util.CollectionList;
 import util.ICollectionList;
-import xyz.acrylicstyle.paper.block.TileEntity;
-import xyz.acrylicstyle.paper.block.TileEntityContainer;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -82,12 +84,11 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 } else {
                     e.getPlayer().getInventory().setItemInOffHand(finalStorageBox.getItemStack());
                 }
+                BlockState state = e.getBlockPlaced().getState();
+                if (state instanceof Chest) {
+                    ((Chest) state).setCustomName(null);
+                }
             });
-            World world = e.getBlockPlaced().getWorld();
-            TileEntity te = world.getTileEntity(e.getBlockPlaced().getLocation());
-            if (te instanceof TileEntityContainer) {
-                ((TileEntityContainer) te).setCustomName(null);
-            }
         });
     }
 
@@ -95,7 +96,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
         if (!new ItemStack(e.getItem().getItemStack().getType()).isSimilar(e.getItem().getItemStack())) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
-        Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack()).complete();
+        Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack());
         if (storageBox == null) return;
         int amount = e.getItem().getItemStack().getAmount();
         e.setCancelled(true);
@@ -118,6 +119,24 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         if (item == null) return;
         if (StorageBox.getStorageBox(item) == null) return;
         e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (e.getWhoClicked().getGameMode() == GameMode.CREATIVE) return;
+        if (e.getClickedInventory() == null) return;
+        if (e.getCurrentItem() == null || e.getCurrentItem().getType().isAir()) return;
+        if (e.getClickedInventory().getType() == InventoryType.PLAYER || e.getClickedInventory().getType() == InventoryType.WORKBENCH) {
+            InventoryType type = e.getInventory().getType();
+            if (type == InventoryType.BREWING
+                    || type == InventoryType.FURNACE
+                    || type == InventoryType.ANVIL
+                    || type == InventoryType.GRINDSTONE
+                    || type == InventoryType.STONECUTTER) {
+                if (StorageBox.getStorageBox(e.getCurrentItem()) == null) return;
+                e.setCancelled(true);
+            }
+        }
     }
 
     /* // disabled because it sucks

@@ -46,15 +46,14 @@ public final class StorageBoxUtils {
         return itemStack;
     }
 
-    public static Promise<Map.Entry<Integer, StorageBox>> getStorageBoxForType(@NotNull Inventory inventory, @NotNull ItemStack item) {
-        return Promise.async(o -> {
-            ItemStack[] c = inventory.getContents();
-            for (int i = 0; i < c.length; i++) {
-                StorageBox box = StorageBox.getStorageBox(c[i]);
-                if (box == null || !box.isAutoCollect()) continue;
-                if (box.getType() != null && new ItemStack(box.getType()).isSimilar(item)) return new AbstractMap.SimpleEntry<>(i, box);
-            }
-            return null;
-        });
+    public static Map.Entry<Integer, StorageBox> getStorageBoxForType(@NotNull Inventory inventory, @NotNull ItemStack item) {
+        ItemStack[] c = inventory.getContents();
+        for (int i = 0; i < c.length; i++) {
+            StorageBox box = StorageBox.getStorageBox(c[i]);
+            if (box == null || !box.isAutoCollect()) continue;
+            if (box.getType() != null && new ItemStack(box.getType()).isSimilar(item))
+                return new AbstractMap.SimpleEntry<>(i, box);
+        }
+        return null;
     }
 }
