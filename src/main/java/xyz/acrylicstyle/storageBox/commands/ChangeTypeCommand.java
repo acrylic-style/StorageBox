@@ -20,6 +20,7 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
         WHITELIST.add(Material.COAL);
         WHITELIST.add(Material.CHARCOAL);
         WHITELIST.add(Material.DIAMOND);
+        WHITELIST.add(Material.EMERALD);
         WHITELIST.add(Material.STICK);
         WHITELIST.add(Material.DEBUG_STICK);
         WHITELIST.add(Material.SUGAR);
