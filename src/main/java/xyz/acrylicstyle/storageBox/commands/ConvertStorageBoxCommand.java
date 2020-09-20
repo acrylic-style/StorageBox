@@ -5,11 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import util.Collection;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerOpSubCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
 @SubCommand(name = "convert", usage = "/storage convert", description = "Storage Boxの種類を変換します。")
-public class ConvertCommand extends PlayerOpSubCommandExecutor {
+public class ConvertStorageBoxCommand extends PlayerSubCommandExecutor {
     public static final Collection<Material, Material> materials = new Collection<>();
 
     static {
