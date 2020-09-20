@@ -25,7 +25,7 @@ public class ConvertCommand extends PlayerOpSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "Storage Boxを手に持ってからもう一度試してください。");
             return;
         }
-        if (materials.containsKey(storageBox.getType())) {
+        if (!materials.containsKey(storageBox.getType())) {
             player.sendMessage(ChatColor.RED + "このStorage Boxは変換できません。");
             return;
         }
