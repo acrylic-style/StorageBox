@@ -19,10 +19,6 @@ public class ConvertCommand extends PlayerOpSubCommandExecutor {
     
     @Override
     public void onCommand(Player player, String[] args) {
-        if (args.length == 0) {
-            player.sendMessage(ChatColor.RED + "アイテムの種類を指定してください。");
-            return;
-        }
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
         if (storageBox == null) {
             player.sendMessage(ChatColor.RED + "現在手に持ってるアイテムはStorage Boxではありません。");
