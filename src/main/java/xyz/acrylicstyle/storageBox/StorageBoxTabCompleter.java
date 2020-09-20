@@ -28,7 +28,7 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "new",
             "extract",
             "collect",
-            "settype"
+            "convert"
     );
 
     private static final CollectionList<String> opCommands = new CollectionList<>(

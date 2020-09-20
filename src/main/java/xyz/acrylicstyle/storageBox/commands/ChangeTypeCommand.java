@@ -23,6 +23,8 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
         WHITELIST.add(Material.STICK);
         WHITELIST.add(Material.DEBUG_STICK);
         WHITELIST.add(Material.SUGAR);
+        WHITELIST.add(Material.STRING);
+        WHITELIST.add(Material.LAPIS_LAZULI);
         WHITELIST.add(Material.WHEAT_SEEDS);
         WHITELIST.add(Material.NETHERITE_INGOT);
         WHITELIST.addAll(ICollectionList.asList(Material.values()).filter(m -> m.name().endsWith("_DYE")));
