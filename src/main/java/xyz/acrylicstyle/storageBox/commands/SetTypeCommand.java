@@ -4,13 +4,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerOpSubCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
-@SubCommand(name = "settype", usage = "/storage settype <material>", description = "アイテムの種類を設定します。[OP]")
-public class SetTypeCommand extends PlayerOpSubCommandExecutor {
-    @Override
-    public void onCommand(Player player, String[] args) {
+public class SetTypeCommand {
+    public static void onCommand(Player player, String[] args) {
+        if (!player.isOp()) {
+            player.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+            return;
+        }
         if (args.length == 0) {
             player.sendMessage(ChatColor.RED + "アイテムの種類を指定してください。");
             return;

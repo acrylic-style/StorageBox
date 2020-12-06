@@ -7,41 +7,44 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import util.CollectionList;
-import util.ICollectionList;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
-import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
-import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public static Logger LOGGER = Logger.getLogger("StorageBox");
-    public static ConfigProvider config = null;
-    public static CollectionList<UUID> bypassingPlayers = new CollectionList<>();
+    public static List<UUID> bypassingPlayers = new ArrayList<>();
+    public static FileConfiguration config = null;
 
     @Override
     public void onEnable() {
         LOGGER.info("Loading config");
-        config = ConfigProvider.getConfig("./plugins/StorageBox/config.yml");
+        config = getConfig();
         LOGGER.info("Registering SubCommands");
-        TomeitoAPI.getInstance().registerCommands(this.getClassLoader(), "storagebox", "xyz.acrylicstyle.storageBox.commands");
-        TomeitoAPI.registerTabCompleter("storagebox", new StorageBoxTabCompleter());
+        Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
+        Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
         LOGGER.info("Registering Events");
         Bukkit.getPluginManager().registerEvents(this, this);
         LOGGER.info("Enabled StorageBox");
@@ -50,7 +53,11 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         LOGGER.info("Saving config");
-        config.save();
+        try {
+            getConfig().save(new File("./plugins/StorageBox/config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         LOGGER.info("Saved config");
     }
 
@@ -93,18 +100,20 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerAttemptPickupItem(PlayerAttemptPickupItemEvent e) {
+    public void onPlayerAttemptPickupItem(EntityPickupItemEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
+        Player player = (Player) e.getEntity();
         if (!new ItemStack(e.getItem().getItemStack().getType()).isSimilar(e.getItem().getItemStack())) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
-        Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), e.getItem().getItemStack());
+        Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(player.getInventory(), e.getItem().getItemStack());
         if (storageBox == null) return;
         int amount = e.getItem().getItemStack().getAmount();
         e.setCancelled(true);
         e.getItem().getItemStack().setAmount(0);
         e.getItem().remove();
-        e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.9F);
+        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.9F);
         storageBox.getValue().setAmount(storageBox.getValue().getAmount() + amount);
-        e.getPlayer().getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
+        player.getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -114,7 +123,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPrepareItemCraft(PrepareItemCraftEvent e) {
-        if (ICollectionList.asList(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).nonNull().size() != 0) e.getInventory().setResult(null);
+        if (Arrays.stream(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).anyMatch(Objects::nonNull)) e.getInventory().setResult(null);
         ItemStack item = e.getInventory().getResult();
         if (item == null) return;
         if (StorageBox.getStorageBox(item) == null) return;

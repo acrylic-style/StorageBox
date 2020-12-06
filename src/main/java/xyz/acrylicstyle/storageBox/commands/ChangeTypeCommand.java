@@ -4,16 +4,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import util.ICollectionList;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@SubCommand(name = "changetype", usage = "/storage changetype", description = "StorageBoxのアイテムの中身を変えます。オフハンドに変更先のアイテムを持ってください。")
-public class ChangeTypeCommand extends PlayerSubCommandExecutor {
+public class ChangeTypeCommand {
     private static final List<Material> WHITELIST = new ArrayList<>();
 
     static {
@@ -28,13 +26,12 @@ public class ChangeTypeCommand extends PlayerSubCommandExecutor {
         WHITELIST.add(Material.LAPIS_LAZULI);
         WHITELIST.add(Material.WHEAT_SEEDS);
         WHITELIST.add(Material.NETHERITE_INGOT);
-        WHITELIST.addAll(ICollectionList.asList(Material.values()).filter(m -> m.name().endsWith("_DYE")));
-        WHITELIST.addAll(ICollectionList.asList(Material.values()).filter(m -> m.name().endsWith("_INGOT")));
+        WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_DYE")).collect(Collectors.toList()));
+        WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_INGOT")).collect(Collectors.toList()));
         WHITELIST.add(Material.REDSTONE);
     }
 
-    @Override
-    public void onCommand(Player player, String[] args) {
+    public static void onCommand(Player player) {
         ItemStack offHand = player.getInventory().getItemInOffHand();
         if (offHand.getType() == Material.AIR) {
             player.sendMessage(ChatColor.RED + "オフハンドに変更先のアイテムを持ってからもう一度実行してください。");

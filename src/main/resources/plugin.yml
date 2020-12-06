@@ -3,8 +3,6 @@ name: StorageBox
 version: 0.0.1-SNAPSHOT
 api-version: "1.15"
 author: acrylic-style
-depend:
-  - TomeitoLib
 commands:
   storagebox:
     aliases: ["sb", "storage"]

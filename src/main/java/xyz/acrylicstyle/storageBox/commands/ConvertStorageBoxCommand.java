@@ -3,22 +3,20 @@ package xyz.acrylicstyle.storageBox.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import util.Collection;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
-@SubCommand(name = "convert", usage = "/storage convert", description = "Storage Boxの種類を変換します。")
-public class ConvertStorageBoxCommand extends PlayerSubCommandExecutor {
-    public static final Collection<Material, Material> materials = new Collection<>();
+import java.util.HashMap;
+import java.util.Map;
+
+public class ConvertStorageBoxCommand {
+    public static final Map<Material, Material> materials = new HashMap<>();
 
     static {
-        materials.add(Material.STONE, Material.COBBLESTONE);
-        materials.add(Material.COBBLESTONE, Material.STONE);
+        materials.put(Material.STONE, Material.COBBLESTONE);
+        materials.put(Material.COBBLESTONE, Material.STONE);
     }
-    
-    @Override
-    public void onCommand(Player player, String[] args) {
+
+    public static void onCommand(Player player) {
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
         if (storageBox == null) {
             player.sendMessage(ChatColor.RED + "現在手に持ってるアイテムはStorage Boxではありません。");

@@ -1,18 +1,13 @@
 package xyz.acrylicstyle.storageBox.utils;
 
+import net.minecraft.server.v1_17_R0.NBTNumber;
+import net.minecraft.server.v1_17_R0.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_17_R0.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import xyz.acrylicstyle.paper.Paper;
-import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
-import xyz.acrylicstyle.paper.nbt.NBTBase;
-import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -20,30 +15,28 @@ import java.util.UUID;
 
 public class StorageBox {
     private boolean autoCollect;
-    @Nullable
     private Material type;
     private int amount;
 
-    public StorageBox(@Nullable Material type, int amount) {
+    public StorageBox(Material type, int amount) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = true;
     }
 
-    public StorageBox(@Nullable Material type, int amount, boolean autoCollect) {
+    public StorageBox(Material type, int amount, boolean autoCollect) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = autoCollect;
     }
 
-    @Nullable
-    public static StorageBox getStorageBox(@NotNull ItemStack itemStack) {
+    public static StorageBox getStorageBox(ItemStack itemStack) {
         try {
-            NBTTagCompound tag = Paper.itemStack(itemStack).getOrCreateTag();
+            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
             String uuid = tag.hasKey("uuid") ? Objects.requireNonNull(tag.get("uuid")).asString() : "";
             if (!uuid.equals("")) {
                 itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(uuid)); // todo: Storage box - remove this later
-                tag = Paper.itemStack(itemStack).getOrCreateTag();
+                tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
                 tag.remove("uuid");
             }
             if (!tag.hasKey("storageBoxType")) {
@@ -51,7 +44,7 @@ public class StorageBox {
             }
             String s = Objects.requireNonNull(tag.get("storageBoxType")).asString();
             Material type = Material.valueOf(s.equals("") || s.equals("null") ? "AIR" : s.toUpperCase());
-            int amount = ((NBTBase.NBTNumber) Objects.requireNonNull(tag.get("storageBoxAmount"))).asInt();
+            int amount = ((NBTNumber) Objects.requireNonNull(tag.get("storageBoxAmount"))).asInt();
             boolean autoCollect = tag.getBoolean("storageBoxAutoCollect");
             return new StorageBox(type, amount, autoCollect);
         } catch (RuntimeException e) {
@@ -61,8 +54,7 @@ public class StorageBox {
 
     // Storage Box start - todo: remove this later
     @Deprecated
-    @NotNull
-    public static ItemStack migrateStorageBox(@NotNull ItemStack item, @NotNull UUID uuid) {
+    public static ItemStack migrateStorageBox(ItemStack item, UUID uuid) {
         StorageBox storageBox = loadStorageBox(uuid);
         if (storageBox != null) {
             //Log.info("Storage Box " + uuid.toString() + " was successfully migrated.");
@@ -73,8 +65,7 @@ public class StorageBox {
     }
 
     @Deprecated
-    @Nullable
-    private static StorageBox loadStorageBox(@NotNull UUID uuid) {
+    private static StorageBox loadStorageBox(UUID uuid) {
         if (StorageBoxPlugin.config.get("boxes." + uuid.toString()) == null) return null;
         //Log.info("Migrating StorageBox: " + uuid.toString());
         boolean autoCollect = StorageBoxPlugin.config.getBoolean("boxes." + uuid.toString() + ".autoCollect", true);
@@ -86,19 +77,12 @@ public class StorageBox {
     }
     // Storage Box end - remove this later
 
-    @NotNull
-    @Contract("-> new")
     public static StorageBox getNewStorageBox() { return getNewStorageBox(null); }
 
-    @NotNull
-    @Contract("_ -> new")
-    public static StorageBox getNewStorageBox(@Nullable Material type) { return getNewStorageBox(type, 0); }
+    public static StorageBox getNewStorageBox(Material type) { return getNewStorageBox(type, 0); }
 
-    @NotNull
-    @Contract("_, _ -> new")
-    public static StorageBox getNewStorageBox(@Nullable Material type, int amount) { return new StorageBox(type, amount); }
+    public static StorageBox getNewStorageBox(Material type, int amount) { return new StorageBox(type, amount); }
 
-    @NotNull
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(getType() == null ? Material.BARRIER : getType());
         ItemMeta meta = item.getItemMeta();
@@ -112,7 +96,7 @@ public class StorageBox {
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
-        ItemStackUtils is = Paper.itemStack(item);
+        net.minecraft.server.v1_17_R0.ItemStack is = CraftItemStack.asNMSCopy(item);
         NBTTagCompound tag = is.getOrCreateTag();
         tag.remove("uuid");
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
@@ -120,7 +104,7 @@ public class StorageBox {
         tag.setBoolean("storageBoxAutoCollect", this.autoCollect);
         tag.setString("randomUUID", UUID.randomUUID().toString());
         is.setTag(tag);
-        return is.getItemStack();
+        return CraftItemStack.asBukkitCopy(is);
     }
 
     public void setAmount(int amount) { this.amount = amount; }
@@ -133,14 +117,13 @@ public class StorageBox {
      * Get material of this storage box.
      * @return Null if undefined, material otherwise.
      */
-    @Nullable
     public Material getType() { return type == null || type.isAir() ? null : type; }
 
     /**
      * Set material of this storage box.
      * @param type Null if undefined, material otherwise.
      */
-    public void setType(@Nullable Material type) { this.type = type; }
+    public void setType(Material type) { this.type = type; }
 
     public int getAmount() { return amount; }
 

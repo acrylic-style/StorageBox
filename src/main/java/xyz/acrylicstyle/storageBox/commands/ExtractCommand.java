@@ -5,16 +5,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
-import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
-@SubCommand(name = "extract", usage = "/storage extract [amount]", description = "アイテムをStorage Boxから取り出します。")
-public class ExtractCommand extends PlayerSubCommandExecutor {
-    @Override
-    public void onCommand(Player player, String[] args) {
-        if (args.length == 0 || !TypeUtil.isInt(args[0])) {
+public class ExtractCommand {
+    public static void onCommand(Player player, String[] args) {
+        if (args.length == 0) {
             player.sendMessage(ChatColor.RED + "Amountに数字を指定してください。");
             return;
         }
@@ -24,7 +18,13 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             player.sendMessage(ChatColor.RED + "Storage Boxを手に持ってからもう一度試してください。");
             return;
         }
-        int amount = Integer.parseInt(args[0]);
+        int amount;
+        try {
+            amount = Integer.parseInt(args[0]);
+        } catch (NumberFormatException ex) {
+            player.sendMessage(ChatColor.RED + "Amountに数字を指定してください。");
+            return;
+        }
         if (amount < 0) {
             player.sendMessage(ChatColor.RED + "マイナスの値を指定することはできません。");
             return;
@@ -34,9 +34,6 @@ public class ExtractCommand extends PlayerSubCommandExecutor {
             return;
         }
         int i = (int) Math.ceil(amount / 64F);
-        Log.info("Empty Slots: " + StorageBoxPlugin.getEmptySlots(player));
-        Log.info("I: " + i);
-        Log.info("B: " + (StorageBoxPlugin.getEmptySlots(player) >= i));
         if (StorageBoxPlugin.getEmptySlots(player) >= i) {
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];

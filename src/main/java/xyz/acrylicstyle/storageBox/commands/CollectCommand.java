@@ -5,13 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
-import xyz.acrylicstyle.tomeito_api.subcommand.PlayerSubCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.subcommand.SubCommand;
 
-@SubCommand(name = "collect", usage = "/storage collect", description = "手に持ってるStorage Boxにインベントリに入ってるブロックを収納します。")
-public class CollectCommand extends PlayerSubCommandExecutor {
-    @Override
-    public void onCommand(Player player, String[] args) {
+public class CollectCommand {
+    public static void onCommand(Player player) {
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
         if (fillTo(storageBox, player.getInventory())) {
             player.sendMessage(ChatColor.RED + "Storage Boxを持っていないか、Storage Boxの種類が「空」です。");

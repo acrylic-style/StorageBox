@@ -1,17 +1,12 @@
 package xyz.acrylicstyle.storageBox.utils;
 
+import net.minecraft.server.v1_17_R0.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_17_R0.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
-import util.Validate;
-import util.promise.Promise;
-import xyz.acrylicstyle.paper.Paper;
-import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
-import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -23,16 +18,14 @@ public final class StorageBoxUtils {
     private StorageBoxUtils() {}
 
     public static ItemStack updateStorageBox(ItemStack itemStack) {
-        ItemStackUtils is = Paper.itemStack(itemStack);
-        NBTTagCompound tag = is.getOrCreateTag();
+        net.minecraft.server.v1_17_R0.ItemStack item = CraftItemStack.asNMSCopy(itemStack);
+        NBTTagCompound tag = item.getOrCreateTag();
         String s = tag.hasKey("uuid") ? Objects.requireNonNull(tag.get("uuid")).asString() : "";
         if (!s.equals("")) itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(s)); // Storage box - todo: remove this later
         StorageBox storageBox = StorageBox.getStorageBox(itemStack);
         if (storageBox == null) return itemStack;
         itemStack.setType(storageBox.getType() == null ? Material.BARRIER : storageBox.getType());
-        Log.info("ItemStack: " + itemStack);
         ItemMeta meta = itemStack.getItemMeta();
-        Validate.notNull(meta, "meta cannot be null");
         String name;
         if (storageBox.getType() == null) {
             name = "空";
@@ -46,7 +39,7 @@ public final class StorageBoxUtils {
         return itemStack;
     }
 
-    public static Map.Entry<Integer, StorageBox> getStorageBoxForType(@NotNull Inventory inventory, @NotNull ItemStack item) {
+    public static Map.Entry<Integer, StorageBox> getStorageBoxForType(Inventory inventory, ItemStack item) {
         ItemStack[] c = inventory.getContents();
         for (int i = 0; i < c.length; i++) {
             StorageBox box = StorageBox.getStorageBox(c[i]);
