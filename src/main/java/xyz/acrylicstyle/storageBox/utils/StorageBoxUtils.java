@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import util.Validate;
-import util.promise.Promise;
 import xyz.acrylicstyle.paper.Paper;
 import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
 import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
@@ -40,7 +39,7 @@ public final class StorageBoxUtils {
             name = storageBox.getType().name().replaceAll("_", " ").toLowerCase();
             name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         }
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
+        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "] " + ChatColor.GRAY + "(x" + storageBox.getAmount() + ")");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + storageBox.getAmount(), ChatColor.GRAY + "AutoCollect: " + storageBox.isAutoCollect()));
         itemStack.setItemMeta(meta);
         return itemStack;

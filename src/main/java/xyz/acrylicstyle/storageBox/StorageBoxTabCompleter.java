@@ -14,11 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StorageBoxTabCompleter implements TabCompleter {
-    private static CollectionList<String> filterArgsList(CollectionList<String> list, String s) {
+    private static ICollectionList<String> filterArgsList(ICollectionList<String> list, String s) {
         return list.filter(s2 -> s2.toLowerCase().replaceAll(".*:(.*)", "$1").startsWith(s.toLowerCase().replaceAll(".*:(.*)", "$1")));
     }
 
-    private static CollectionList<String> filterArgsList(List<String> list, String s) { return filterArgsList(new CollectionList<>(list), s); }
+    private static ICollectionList<String> filterArgsList(List<String> list, String s) { return filterArgsList(new CollectionList<>(list), s); }
 
     private static final List<String> emptyList = new ArrayList<>();
 
@@ -31,12 +31,12 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "convert"
     );
 
-    private static final CollectionList<String> opCommands = new CollectionList<>(
+    private static final ICollectionList<String> opCommands = new CollectionList<>(
             "resetconfig",
             "bypass",
             "setamount",
             "settype"
-    ).concat(ICollectionList.asList(commands));
+    ).thenAddAll(commands);
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {

@@ -55,6 +55,10 @@
             <url>https://repo.acrylicstyle.xyz/</url>
         </repository>
         <repository>
+            <id>acrylic-repo2</id>
+            <url>https://repo2.acrylicstyle.xyz/</url>
+        </repository>
+        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
@@ -69,7 +73,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.5.1</version>
+            <version>0.7.4a</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

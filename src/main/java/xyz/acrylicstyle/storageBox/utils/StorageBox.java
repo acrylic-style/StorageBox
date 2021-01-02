@@ -12,7 +12,6 @@ import xyz.acrylicstyle.paper.inventory.ItemStackUtils;
 import xyz.acrylicstyle.paper.nbt.NBTBase;
 import xyz.acrylicstyle.paper.nbt.NBTTagCompound;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -109,7 +108,7 @@ public class StorageBox {
             name = getType().name().replaceAll("_", " ").toLowerCase();
             name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         }
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
+        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "] " + ChatColor.GRAY + "(x" + getAmount() + ")");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
         ItemStackUtils is = Paper.itemStack(item);
