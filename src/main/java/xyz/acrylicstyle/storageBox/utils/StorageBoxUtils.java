@@ -1,9 +1,7 @@
 package xyz.acrylicstyle.storageBox.utils;
 
-import net.minecraft.server.v1_17_R0.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R0.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -11,17 +9,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 
 public final class StorageBoxUtils {
     private StorageBoxUtils() {}
 
     public static ItemStack updateStorageBox(ItemStack itemStack) {
-        net.minecraft.server.v1_17_R0.ItemStack item = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tag = item.getOrCreateTag();
-        String s = tag.hasKey("uuid") ? Objects.requireNonNull(tag.get("uuid")).asString() : "";
-        if (!s.equals("")) itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(s)); // Storage box - todo: remove this later
         StorageBox storageBox = StorageBox.getStorageBox(itemStack);
         if (storageBox == null) return itemStack;
         itemStack.setType(storageBox.getType() == null ? Material.BARRIER : storageBox.getType());

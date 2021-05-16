@@ -15,6 +15,6 @@ public class AutoCollectCommand {
         boolean b = storageBox.isAutoCollect();
         storageBox.setAutoCollect(!b);
         player.getInventory().setItemInMainHand(storageBox.getItemStack());
-        player.sendMessage(ChatColor.GREEN + "Auto Collectを" + ChatColor.YELLOW + (!b) + ChatColor.GREEN + "にしました。");
+        player.sendMessage(ChatColor.GREEN + "自動回収を" + ChatColor.YELLOW + (!b) + ChatColor.GREEN + "にしました。");
     }
 }

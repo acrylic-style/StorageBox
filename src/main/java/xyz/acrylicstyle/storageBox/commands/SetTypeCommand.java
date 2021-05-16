@@ -8,7 +8,6 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 public class SetTypeCommand {
     public static void onCommand(Player player, String[] args) {
         if (!player.isOp()) {
-            player.sendMessage(ChatColor.RED + "You don't have permission to do this.");
             return;
         }
         if (args.length == 0) {

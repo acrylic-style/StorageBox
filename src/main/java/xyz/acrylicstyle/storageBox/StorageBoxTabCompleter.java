@@ -20,7 +20,6 @@ public class StorageBoxTabCompleter implements TabCompleter {
     private static final List<String> commands = Arrays.asList(
             "autocollect",
             "changetype",
-            "new",
             "extract",
             "collect",
             "convert"
@@ -32,7 +31,6 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "settype",
             "autocollect",
             "changetype",
-            "new",
             "extract",
             "collect",
             "convert"

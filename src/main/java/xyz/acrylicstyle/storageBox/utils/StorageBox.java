@@ -1,13 +1,12 @@
 package xyz.acrylicstyle.storageBox.utils;
 
-import net.minecraft.server.v1_17_R0.NBTNumber;
-import net.minecraft.server.v1_17_R0.NBTTagCompound;
+import net.minecraft.server.v1_16_R3.NBTNumber;
+import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R0.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -33,12 +32,6 @@ public class StorageBox {
     public static StorageBox getStorageBox(ItemStack itemStack) {
         try {
             NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
-            String uuid = tag.hasKey("uuid") ? Objects.requireNonNull(tag.get("uuid")).asString() : "";
-            if (!uuid.equals("")) {
-                itemStack = StorageBox.migrateStorageBox(itemStack, UUID.fromString(uuid)); // todo: Storage box - remove this later
-                tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
-                tag.remove("uuid");
-            }
             if (!tag.hasKey("storageBoxType")) {
                 return null;
             }
@@ -51,31 +44,6 @@ public class StorageBox {
             return null;
         }
     }
-
-    // Storage Box start - todo: remove this later
-    @Deprecated
-    public static ItemStack migrateStorageBox(ItemStack item, UUID uuid) {
-        StorageBox storageBox = loadStorageBox(uuid);
-        if (storageBox != null) {
-            //Log.info("Storage Box " + uuid.toString() + " was successfully migrated.");
-            return storageBox.getItemStack();
-        } else {
-            return item;
-        }
-    }
-
-    @Deprecated
-    private static StorageBox loadStorageBox(UUID uuid) {
-        if (StorageBoxPlugin.config.get("boxes." + uuid.toString()) == null) return null;
-        //Log.info("Migrating StorageBox: " + uuid.toString());
-        boolean autoCollect = StorageBoxPlugin.config.getBoolean("boxes." + uuid.toString() + ".autoCollect", true);
-        String _t = StorageBoxPlugin.config.getString("boxes." + uuid.toString() + ".type");
-        Material type = _t == null ? null : Material.getMaterial(_t);
-        int amount = StorageBoxPlugin.config.getInt("boxes." + uuid.toString() + ".amount", 0);
-        StorageBoxPlugin.config.set("migratedBoxes." + uuid.toString(), StorageBoxPlugin.config.get("boxes." + uuid.toString()));
-        return new StorageBox(type, amount, autoCollect);
-    }
-    // Storage Box end - remove this later
 
     public static StorageBox getNewStorageBox() { return getNewStorageBox(null); }
 
@@ -96,9 +64,8 @@ public class StorageBox {
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
-        net.minecraft.server.v1_17_R0.ItemStack is = CraftItemStack.asNMSCopy(item);
+        net.minecraft.server.v1_16_R3.ItemStack is = CraftItemStack.asNMSCopy(item);
         NBTTagCompound tag = is.getOrCreateTag();
-        tag.remove("uuid");
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.setInt("storageBoxAmount", this.amount);
         tag.setBoolean("storageBoxAutoCollect", this.autoCollect);

@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
@@ -15,10 +16,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
@@ -42,11 +45,20 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         LOGGER.info("Loading config");
         config = getConfig();
-        LOGGER.info("Registering SubCommands");
+        LOGGER.info("Registering commands");
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
-        LOGGER.info("Registering Events");
+        LOGGER.info("Registering events/recipes");
         Bukkit.getPluginManager().registerEvents(this, this);
+        try {
+            ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
+            recipe.shape("DDD", "DCD", "DDD");
+            recipe.setIngredient('D', Material.DIAMOND);
+            recipe.setIngredient('C', Material.CHEST);
+            Bukkit.addRecipe(recipe);
+        } catch (RuntimeException ex) {
+            // ignore any "dupe recipe" error or something like that
+        }
         LOGGER.info("Enabled StorageBox");
     }
 
@@ -121,13 +133,36 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         if (StorageBox.getStorageBox(e.getItem()) != null) e.setCancelled(true);
     }
 
+    private static ItemStack n(ItemStack item) {
+        return item == null ? new ItemStack(Material.AIR) : item;
+    }
+
     @EventHandler
     public void onPrepareItemCraft(PrepareItemCraftEvent e) {
+        ItemStack[] matrix = e.getInventory().getMatrix();
+        if (matrix.length == 9) {
+            if (
+                    n(matrix[0]).getType() == Material.DIAMOND && n(matrix[1]).getType() == Material.DIAMOND && n(matrix[2]).getType() == Material.DIAMOND
+                    && n(matrix[3]).getType() == Material.DIAMOND && n(matrix[4]).getType() == Material.CHEST && n(matrix[5]).getType() == Material.DIAMOND
+                    && n(matrix[6]).getType() == Material.DIAMOND && n(matrix[7]).getType() == Material.DIAMOND && n(matrix[8]).getType() == Material.DIAMOND
+            ) {
+                e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
+                return;
+            }
+        }
         if (Arrays.stream(e.getInventory().getMatrix()).map(StorageBox::getStorageBox).anyMatch(Objects::nonNull)) e.getInventory().setResult(null);
         ItemStack item = e.getInventory().getResult();
         if (item == null) return;
         if (StorageBox.getStorageBox(item) == null) return;
         e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
+    }
+
+    @EventHandler
+    public void onCraftItem(CraftItemEvent e) {
+        if (StorageBox.getStorageBox(e.getInventory().getResult()) != null) {
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムの種類を設定するには" + ChatColor.YELLOW + "/storage changetype" + ChatColor.GREEN + "を実行してください。");
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "その他の使い方などは" + ChatColor.YELLOW + "/storage" + ChatColor.GREEN + "を見てください。");
+        }
     }
 
     @EventHandler

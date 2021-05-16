@@ -7,7 +7,6 @@ import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 public class BypassCommand {
     public static void onCommand(Player player) {
         if (!player.isOp()) {
-            player.sendMessage(ChatColor.RED + "You don't have permission to do this.");
             return;
         }
         if (StorageBoxPlugin.bypassingPlayers.contains(player.getUniqueId())) {
