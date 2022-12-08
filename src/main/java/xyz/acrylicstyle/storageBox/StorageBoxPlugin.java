@@ -37,12 +37,13 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class StorageBoxPlugin extends JavaPlugin implements Listener {
-    public static Logger LOGGER = Logger.getLogger("StorageBox");
+    public static Logger LOGGER;
     public static List<UUID> bypassingPlayers = new ArrayList<>();
     public static FileConfiguration config = null;
 
     @Override
     public void onEnable() {
+        LOGGER = getLogger();
         LOGGER.info("Loading config");
         config = getConfig();
         LOGGER.info("Registering commands");
@@ -77,7 +78,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     public void runAsync(Runnable runnable) { Bukkit.getScheduler().runTaskAsynchronously(this, runnable); }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent e) {
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
         boolean mainHand = true;
@@ -111,15 +112,14 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerAttemptPickupItem(EntityPickupItemEvent e) {
-        if (!(e.getEntity() instanceof Player)) return;
-        Player player = (Player) e.getEntity();
+        if (!(e.getEntity() instanceof Player player)) return;
         if (!new ItemStack(e.getItem().getItemStack().getType()).isSimilar(e.getItem().getItemStack())) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
         Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(player.getInventory(), e.getItem().getItemStack());
         if (storageBox == null) return;
-        int amount = e.getItem().getItemStack().getAmount();
+        long amount = e.getItem().getItemStack().getAmount();
         e.setCancelled(true);
         e.getItem().getItemStack().setAmount(0);
         e.getItem().remove();

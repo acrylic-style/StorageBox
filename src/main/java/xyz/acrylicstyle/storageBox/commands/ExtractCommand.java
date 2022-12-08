@@ -22,7 +22,7 @@ public class ExtractCommand {
         try {
             amount = Integer.parseInt(args[0]);
         } catch (NumberFormatException ex) {
-            player.sendMessage(ChatColor.RED + "Amountに数字を指定してください。");
+            player.sendMessage(ChatColor.RED + "数値を指定してください。");
             return;
         }
         if (amount < 0) {

@@ -12,8 +12,8 @@ public class ConvertStorageBoxCommand {
     public static final Map<Material, Material> materials = new HashMap<>();
 
     static {
-        materials.put(Material.STONE, Material.COBBLESTONE);
-        materials.put(Material.COBBLESTONE, Material.STONE);
+        //materials.put(Material.STONE, Material.COBBLESTONE);
+        //materials.put(Material.COBBLESTONE, Material.STONE);
     }
 
     public static void onCommand(Player player) {

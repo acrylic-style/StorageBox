@@ -19,9 +19,9 @@ public class SetAmountCommand {
             player.sendMessage(ChatColor.RED + "Storage Boxを手に持ってからもう一度試してください。");
             return;
         }
-        int amount;
+        long amount;
         try {
-            amount = Integer.parseInt(args[0]);
+            amount = Long.parseLong(args[0]);
         } catch (NumberFormatException ex) {
             player.sendMessage(ChatColor.RED + "数字を指定してください。");
             return;

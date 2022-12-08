@@ -1,10 +1,10 @@
 package xyz.acrylicstyle.storageBox.utils;
 
-import net.minecraft.server.v1_16_R3.NBTNumber;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagLong;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -15,15 +15,15 @@ import java.util.UUID;
 public class StorageBox {
     private boolean autoCollect;
     private Material type;
-    private int amount;
+    private long amount;
 
-    public StorageBox(Material type, int amount) {
+    public StorageBox(Material type, long amount) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = true;
     }
 
-    public StorageBox(Material type, int amount, boolean autoCollect) {
+    public StorageBox(Material type, long amount, boolean autoCollect) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = autoCollect;
@@ -31,14 +31,14 @@ public class StorageBox {
 
     public static StorageBox getStorageBox(ItemStack itemStack) {
         try {
-            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
-            if (!tag.hasKey("storageBoxType")) {
+            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).v();
+            if (!tag.e("storageBoxType")) {
                 return null;
             }
-            String s = Objects.requireNonNull(tag.get("storageBoxType")).asString();
+            String s = Objects.requireNonNull(tag.c("storageBoxType")).e_();
             Material type = Material.valueOf(s.equals("") || s.equals("null") ? "AIR" : s.toUpperCase());
-            int amount = ((NBTNumber) Objects.requireNonNull(tag.get("storageBoxAmount"))).asInt();
-            boolean autoCollect = tag.getBoolean("storageBoxAutoCollect");
+            long amount = ((NBTTagLong) Objects.requireNonNull(tag.c("storageBoxAmount"))).e();
+            boolean autoCollect = tag.q("storageBoxAutoCollect");
             return new StorageBox(type, amount, autoCollect);
         } catch (RuntimeException e) {
             return null;
@@ -49,11 +49,14 @@ public class StorageBox {
 
     public static StorageBox getNewStorageBox(Material type) { return getNewStorageBox(type, 0); }
 
-    public static StorageBox getNewStorageBox(Material type, int amount) { return new StorageBox(type, amount); }
+    public static StorageBox getNewStorageBox(Material type, long amount) { return new StorageBox(type, amount); }
 
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(getType() == null ? Material.BARRIER : getType());
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            throw new RuntimeException("ItemMeta is null");
+        }
         String name;
         if (getType() == null) {
             name = "空";
@@ -64,17 +67,17 @@ public class StorageBox {
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
-        net.minecraft.server.v1_16_R3.ItemStack is = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound tag = is.getOrCreateTag();
-        tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
-        tag.setInt("storageBoxAmount", this.amount);
-        tag.setBoolean("storageBoxAutoCollect", this.autoCollect);
-        tag.setString("randomUUID", UUID.randomUUID().toString());
-        is.setTag(tag);
+        net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
+        NBTTagCompound tag = is.v();
+        tag.a("storageBoxType", this.type == null ? "null" : this.type.name());
+        tag.a("storageBoxAmount", this.amount);
+        tag.a("storageBoxAutoCollect", this.autoCollect);
+        tag.a("randomUUID", UUID.randomUUID().toString());
+        is.c(tag);
         return CraftItemStack.asBukkitCopy(is);
     }
 
-    public void setAmount(int amount) { this.amount = amount; }
+    public void setAmount(long amount) { this.amount = amount; }
 
     public void increaseAmount() { setAmount(amount + 1); }
 
@@ -92,7 +95,7 @@ public class StorageBox {
      */
     public void setType(Material type) { this.type = type; }
 
-    public int getAmount() { return amount; }
+    public long getAmount() { return amount; }
 
     public boolean isEmpty() { return amount <= 0; }
 
