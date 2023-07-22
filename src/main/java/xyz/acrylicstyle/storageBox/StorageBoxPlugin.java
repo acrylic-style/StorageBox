@@ -39,17 +39,15 @@ import java.util.logging.Logger;
 public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public static Logger LOGGER;
     public static List<UUID> bypassingPlayers = new ArrayList<>();
-    public static FileConfiguration config = null;
+    public static int customModelData = 200000000;
 
     @Override
     public void onEnable() {
         LOGGER = getLogger();
-        LOGGER.info("Loading config");
-        config = getConfig();
-        LOGGER.info("Registering commands");
+        saveDefaultConfig();
+        customModelData = getConfig().getInt("custom-model-data", customModelData);
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
-        LOGGER.info("Registering events/recipes");
         Bukkit.getPluginManager().registerEvents(this, this);
         try {
             ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
@@ -60,7 +58,6 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         } catch (RuntimeException ex) {
             // ignore any "dupe recipe" error or something like that
         }
-        LOGGER.info("Enabled StorageBox");
     }
 
     @Override
@@ -160,8 +157,10 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onCraftItem(CraftItemEvent e) {
         if (StorageBox.getStorageBox(e.getInventory().getResult()) != null) {
-            e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムの種類を設定するには" + ChatColor.YELLOW + "/storage changetype" + ChatColor.GREEN + "を実行してください。");
-            e.getWhoClicked().sendMessage(ChatColor.GREEN + "その他の使い方などは" + ChatColor.YELLOW + "/storage" + ChatColor.GREEN + "を見てください。");
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムの種類を設定するには、設定したいものをオフハンドに持ったうえで" + ChatColor.YELLOW + "/sb changetype" + ChatColor.GREEN + "を実行してください。");
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムを取り出すには" + ChatColor.YELLOW + "/sb extract <数>" + ChatColor.GREEN + "を実行してください。");
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "自動収集をオフにするには" + ChatColor.YELLOW + "/sb autocollect" + ChatColor.GREEN + "を実行してください。");
+            e.getWhoClicked().sendMessage(ChatColor.GREEN + "その他の使い方などは" + ChatColor.YELLOW + "/sb" + ChatColor.GREEN + "を見てください。");
         }
     }
 

@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -64,6 +65,7 @@ public class StorageBox {
         }
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
+        meta.setCustomModelData(StorageBoxPlugin.customModelData);
         item.setItemMeta(meta);
         net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
         NBTTagCompound tag = is.w();
