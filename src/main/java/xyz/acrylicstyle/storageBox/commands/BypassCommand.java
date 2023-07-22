@@ -6,7 +6,7 @@ import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
 public class BypassCommand {
     public static void onCommand(Player player) {
-        if (!player.isOp()) {
+        if (!player.hasPermission("storagebox.op")) {
             return;
         }
         if (StorageBoxPlugin.bypassingPlayers.contains(player.getUniqueId())) {

@@ -7,7 +7,7 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
 public class SetTypeCommand {
     public static void onCommand(Player player, String[] args) {
-        if (!player.isOp()) {
+        if (!player.hasPermission("storagebox.op")) {
             return;
         }
         if (args.length == 0) {

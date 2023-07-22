@@ -22,7 +22,7 @@ import java.util.List;
 public class RootCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("hi");
             return true;
         }
@@ -33,10 +33,9 @@ public class RootCommand implements CommandExecutor {
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
         argsList.remove(0);
         String[] slicedArgs = argsList.toArray(new String[0]);
-        Player player = (Player) sender;
         if (args[0].equalsIgnoreCase("autocollect")) {
             AutoCollectCommand.onCommand(player);
-        } else if (args[0].equalsIgnoreCase("bypass") && player.isOp()) {
+        } else if (args[0].equalsIgnoreCase("bypass") && player.hasPermission("storagebox.op")) {
             BypassCommand.onCommand(player);
         } else if (args[0].equalsIgnoreCase("changetype")) {
             ChangeTypeCommand.onCommand(player);
@@ -48,9 +47,9 @@ public class RootCommand implements CommandExecutor {
             ExtractCommand.onCommand(player, slicedArgs);
         } else if (args[0].equalsIgnoreCase("new")) {
             NewCommand.onCommand(player);
-        } else if (args[0].equalsIgnoreCase("setamount") && player.isOp()) {
+        } else if (args[0].equalsIgnoreCase("setamount") && player.hasPermission("storagebox.op")) {
             SetAmountCommand.onCommand(player, slicedArgs);
-        } else if (args[0].equalsIgnoreCase("settype") && player.isOp()) {
+        } else if (args[0].equalsIgnoreCase("settype") && player.hasPermission("storagebox.op")) {
             SetTypeCommand.onCommand(player, slicedArgs);
         } else {
             sendHelp(sender);
@@ -66,7 +65,7 @@ public class RootCommand implements CommandExecutor {
         sender.sendMessage(help("convert", "Storage Boxの種類を変換します。"));
         sender.sendMessage(help("extract <amount>", "アイテムをStorage Boxから取り出します。"));
         sender.sendMessage(help("new", "新しいStorage Boxを作成します。"));
-        if (sender.isOp()) {
+        if (sender.hasPermission("storagebox.op")) {
             sender.sendMessage(help("bypass", "アイテムチェックなどを無視します。[OP]"));
             sender.sendMessage(help("setamount <amount>", "アイテムの数を設定します。[OP]"));
             sender.sendMessage(help("settype <Material>", "アイテムの種類を設定します。[OP]"));

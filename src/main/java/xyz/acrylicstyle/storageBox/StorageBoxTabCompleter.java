@@ -22,7 +22,8 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "changetype",
             "extract",
             "collect",
-            "convert"
+            "convert",
+            "new"
     );
 
     private static final List<String> opCommands = Arrays.asList(
@@ -33,7 +34,8 @@ public class StorageBoxTabCompleter implements TabCompleter {
             "changetype",
             "extract",
             "collect",
-            "convert"
+            "convert",
+            "new"
     );
 
     private static List<String> materials = null;
@@ -45,10 +47,10 @@ public class StorageBoxTabCompleter implements TabCompleter {
         }
         if (args.length == 0) return commands;
         if (args.length == 1) {
-            return filterArgsList(sender.isOp() ? opCommands : commands, args[0]);
+            return filterArgsList(sender.hasPermission("storagebox.op") ? opCommands : commands, args[0]);
         }
         if (args.length == 2) {
-            if (sender.isOp()) {
+            if (sender.hasPermission("storagebox.op")) {
                 if (args[0].equals("settype")) {
                     return filterArgsList(materials, args[1]);
                 }
