@@ -1,15 +1,13 @@
 package xyz.acrylicstyle.storageBox.utils;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagLong;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.UUID;
 
 public class StorageBox {
@@ -31,13 +29,13 @@ public class StorageBox {
 
     public static StorageBox getStorageBox(ItemStack itemStack) {
         try {
-            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).v();
+            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).w();
             if (!tag.e("storageBoxType")) {
                 return null;
             }
-            String s = Objects.requireNonNull(tag.c("storageBoxType")).e_();
+            String s = tag.l("storageBoxType"); // getString
             Material type = Material.valueOf(s.equals("") || s.equals("null") ? "AIR" : s.toUpperCase());
-            long amount = ((NBTTagLong) Objects.requireNonNull(tag.c("storageBoxAmount"))).e();
+            long amount = tag.i("storageBoxAmount"); // getLong
             boolean autoCollect = tag.q("storageBoxAutoCollect");
             return new StorageBox(type, amount, autoCollect);
         } catch (RuntimeException e) {
@@ -68,7 +66,7 @@ public class StorageBox {
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         item.setItemMeta(meta);
         net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound tag = is.v();
+        NBTTagCompound tag = is.w();
         tag.a("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.a("storageBoxAmount", this.amount);
         tag.a("storageBoxAutoCollect", this.autoCollect);
