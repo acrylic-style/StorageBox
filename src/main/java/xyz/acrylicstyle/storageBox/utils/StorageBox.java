@@ -4,6 +4,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
@@ -35,7 +37,7 @@ public class StorageBox {
                 return null;
             }
             String s = tag.l("storageBoxType"); // getString
-            Material type = Material.valueOf(s.equals("") || s.equals("null") ? "AIR" : s.toUpperCase());
+            Material type = Material.valueOf(s.isEmpty() || s.equals("null") ? "AIR" : s.toUpperCase());
             long amount = tag.i("storageBoxAmount"); // getLong
             boolean autoCollect = tag.q("storageBoxAutoCollect");
             return new StorageBox(type, amount, autoCollect);
@@ -66,6 +68,10 @@ public class StorageBox {
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
         meta.setCustomModelData(StorageBoxPlugin.customModelData);
+        if (amount > 0) {
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
         item.setItemMeta(meta);
         net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
         NBTTagCompound tag = is.w();
