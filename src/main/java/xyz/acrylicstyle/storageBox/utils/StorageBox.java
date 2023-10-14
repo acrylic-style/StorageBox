@@ -1,15 +1,16 @@
 package xyz.acrylicstyle.storageBox.utils;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -17,30 +18,34 @@ public class StorageBox {
     private boolean autoCollect;
     private Material type;
     private long amount;
+    private final @Nullable UUID randomUUID;
 
     public StorageBox(Material type, long amount) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = true;
+        this.randomUUID = null;
     }
 
-    public StorageBox(Material type, long amount, boolean autoCollect) {
+    public StorageBox(Material type, long amount, boolean autoCollect, @Nullable UUID randomUUID) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = autoCollect;
+        this.randomUUID = randomUUID;
     }
 
     public static StorageBox getStorageBox(ItemStack itemStack) {
         try {
-            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).w();
-            if (!tag.e("storageBoxType")) {
+            NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
+            if (!tag.hasKey("storageBoxType")) {
                 return null;
             }
-            String s = tag.l("storageBoxType"); // getString
+            String s = tag.getString("storageBoxType");
             Material type = Material.valueOf(s.isEmpty() || s.equals("null") ? "AIR" : s.toUpperCase());
-            long amount = tag.i("storageBoxAmount"); // getLong
-            boolean autoCollect = tag.q("storageBoxAutoCollect");
-            return new StorageBox(type, amount, autoCollect);
+            long amount = tag.getLong("storageBoxAmount");
+            boolean autoCollect = tag.getBoolean("storageBoxAutoCollect");
+            UUID randomUUID = UUID.fromString(tag.getString("randomUUID"));
+            return new StorageBox(type, amount, autoCollect, randomUUID);
         } catch (RuntimeException e) {
             return null;
         }
@@ -65,21 +70,22 @@ public class StorageBox {
             name = getType().name().replaceAll("_", " ").toLowerCase();
             name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         }
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "]");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect));
+        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "] " + ChatColor.GRAY + "<" + this.amount + ">");
+        String id = randomUUID != null ? randomUUID.toString() : UUID.randomUUID().toString();
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect, ChatColor.GRAY + "ID: " + id));
         meta.setCustomModelData(StorageBoxPlugin.customModelData);
         if (amount > 0) {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
-        net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound tag = is.w();
-        tag.a("storageBoxType", this.type == null ? "null" : this.type.name());
-        tag.a("storageBoxAmount", this.amount);
-        tag.a("storageBoxAutoCollect", this.autoCollect);
-        tag.a("randomUUID", UUID.randomUUID().toString());
-        is.c(tag);
+        net.minecraft.server.v1_15_R1.ItemStack is = CraftItemStack.asNMSCopy(item);
+        NBTTagCompound tag = is.getOrCreateTag();
+        tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
+        tag.setLong("storageBoxAmount", this.amount);
+        tag.setBoolean("storageBoxAutoCollect", this.autoCollect);
+        tag.setString("randomUUID", id);
+        is.setTag(tag);
         return CraftItemStack.asBukkitCopy(is);
     }
 

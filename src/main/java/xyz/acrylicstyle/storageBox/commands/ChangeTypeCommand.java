@@ -25,10 +25,12 @@ public class ChangeTypeCommand {
         WHITELIST.add(Material.STRING);
         WHITELIST.add(Material.LAPIS_LAZULI);
         WHITELIST.add(Material.WHEAT_SEEDS);
-        WHITELIST.add(Material.NETHERITE_INGOT);
         WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_DYE")).collect(Collectors.toList()));
         WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_INGOT")).collect(Collectors.toList()));
         WHITELIST.add(Material.REDSTONE);
+        WHITELIST.add(Material.GLOWSTONE_DUST);
+        WHITELIST.add(Material.RED_MUSHROOM);
+        WHITELIST.add(Material.BROWN_MUSHROOM);
     }
 
     public static void onCommand(Player player) {
@@ -41,8 +43,8 @@ public class ChangeTypeCommand {
             player.sendMessage(ChatColor.RED + "Storage Boxに収納できるのはブロックのみです。");
             return;
         }
-        if (StorageBox.getStorageBox(offHand) != null) {
-            player.sendMessage(ChatColor.RED + "Storage BoxにStorage Boxを収納することはできません。");
+        if (offHand.getType().name().contains("SHULKER") || offHand.hasItemMeta()) {
+            player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
             return;
         }
         ItemStack mainHand = player.getInventory().getItemInMainHand();
