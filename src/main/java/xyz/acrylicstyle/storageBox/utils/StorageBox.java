@@ -12,9 +12,23 @@ import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class StorageBox {
+    private static final Set<Material> opaqueExempt = new HashSet<>(Arrays.asList(
+            Material.COAL, Material.CHARCOAL, Material.DIAMOND, Material.EMERALD, Material.STICK, Material.DEBUG_STICK,
+            Material.SUGAR, Material.STRING, Material.LAPIS_LAZULI, Material.WHEAT_SEEDS, Material.REDSTONE,
+            Material.GLOWSTONE_DUST, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM
+    ));
+
+    static {
+        opaqueExempt.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_DYE")).collect(Collectors.toList()));
+        opaqueExempt.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_INGOT")).collect(Collectors.toList()));
+    }
+
     private boolean autoCollect;
     private Material type;
     private long amount;
@@ -58,7 +72,11 @@ public class StorageBox {
     public static StorageBox getNewStorageBox(Material type, long amount) { return new StorageBox(type, amount); }
 
     public ItemStack getItemStack() {
-        ItemStack item = new ItemStack(getType() == null ? Material.BARRIER : getType());
+        Material itemType = getType() == null ? Material.BARRIER : getType();
+        if (!itemType.isBlock() && !opaqueExempt.contains(itemType)) {
+            itemType = Material.STICK;
+        }
+        ItemStack item = new ItemStack(itemType);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             throw new RuntimeException("ItemMeta is null");

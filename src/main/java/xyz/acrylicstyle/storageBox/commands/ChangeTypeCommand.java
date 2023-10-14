@@ -39,10 +39,6 @@ public class ChangeTypeCommand {
             player.sendMessage(ChatColor.RED + "オフハンドに変更先のアイテムを持ってからもう一度実行してください。");
             return;
         }
-        if (!WHITELIST.contains(offHand.getType()) && !offHand.getType().isBlock()) {
-            player.sendMessage(ChatColor.RED + "Storage Boxに収納できるのはブロックのみです。");
-            return;
-        }
         if (offHand.getType().name().contains("SHULKER") || offHand.hasItemMeta()) {
             player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
             return;
