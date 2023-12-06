@@ -8,10 +8,6 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
 public class ExtractCommand {
     public static void onCommand(Player player, String[] args) {
-        if (args.length == 0) {
-            player.sendMessage(ChatColor.RED + "Amountに数字を指定してください。");
-            return;
-        }
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
         if (storageBox == null) {
             player.sendMessage(ChatColor.RED + "現在手に持ってるアイテムはStorage Boxではありません。");
@@ -20,7 +16,11 @@ public class ExtractCommand {
         }
         int amount;
         try {
-            amount = Integer.parseInt(args[0]);
+            if (args.length == 0 || args[0].equalsIgnoreCase("all")) {
+                amount = StorageBoxPlugin.getEmptySlots(player) * 64;
+            } else {
+                amount = Integer.parseInt(args[0]);
+            }
         } catch (NumberFormatException ex) {
             player.sendMessage(ChatColor.RED + "数値を指定してください。");
             return;
