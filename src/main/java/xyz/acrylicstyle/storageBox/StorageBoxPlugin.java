@@ -2,8 +2,6 @@ package xyz.acrylicstyle.storageBox;
 
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,8 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -213,6 +209,11 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         ItemStack[] cont = p.getInventory().getContents();
         int i = 0;
         for (ItemStack item : cont) if (item == null || item.getType() == Material.AIR) i++;
+        if (p.getInventory().getHelmet() == null || p.getInventory().getHelmet().getType() == Material.AIR) i--;
+        if (p.getInventory().getChestplate() == null || p.getInventory().getChestplate().getType() == Material.AIR) i--;
+        if (p.getInventory().getLeggings() == null || p.getInventory().getLeggings().getType() == Material.AIR) i--;
+        if (p.getInventory().getBoots() == null || p.getInventory().getBoots().getType() == Material.AIR) i--;
+        if (p.getInventory().getItemInOffHand().getType() == Material.AIR) i--;
         return i;
     }
 
