@@ -93,7 +93,7 @@ public class StorageBox {
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect, ChatColor.GRAY + "ID: " + id));
         meta.setCustomModelData(StorageBoxPlugin.customModelData);
         if (amount > 0) {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, true);
+            meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
