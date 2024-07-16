@@ -1,6 +1,5 @@
 package xyz.acrylicstyle.storageBox;
 
-import com.gmail.nossr50.api.ItemSpawnReason;
 import com.gmail.nossr50.datatypes.meta.BonusDropMeta;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.mcMMO;
@@ -163,7 +162,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                     int bonusCount = bonusDropMeta.asInt();
 
                     for (int i = 0; i < bonusCount; i++) {
-                        if (is.getType() == Material.AIR || e.getBlockState().getLocation() == null) continue;
+                        if (is.getType() == Material.AIR) continue;
                         bonus++;
                     }
                 }
@@ -275,20 +274,5 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     public static @NotNull StorageBoxPlugin getInstance() {
         return getPlugin(StorageBoxPlugin.class);
-    }
-
-    @Contract(pure = true)
-    private @NotNull List<ItemSpawnReason> getReasons() {
-        return Arrays.asList(
-                ItemSpawnReason.BONUS_DROPS,
-                ItemSpawnReason.TREE_FELLER_DISPLACED_BLOCK,
-                ItemSpawnReason.EXCAVATION_TREASURE);
-    }
-
-    private boolean shouldCollectReasons(ItemSpawnReason reason) {
-        for (ItemSpawnReason r : getReasons()) {
-            if (r.equals(reason)) return true;
-        }
-        return false;
     }
 }
