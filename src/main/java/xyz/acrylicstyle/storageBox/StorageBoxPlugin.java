@@ -1,5 +1,9 @@
 package xyz.acrylicstyle.storageBox;
 
+import com.gmail.nossr50.api.ItemSpawnReason;
+import com.gmail.nossr50.datatypes.meta.BonusDropMeta;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.mcMMO;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
@@ -19,6 +23,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
@@ -103,7 +109,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerAttemptPickupItem(EntityPickupItemEvent e) {
+    public void onPlayerAttemptPickupItem(@NotNull EntityPickupItemEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
         if (e.getItem().getItemStack().hasItemMeta()) return;
@@ -119,42 +125,92 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         player.getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockDropItem(BlockDropItemEvent e) {
+    @EventHandler
+    public void onBlockDropItemMcMMO(@NotNull BlockDropItemEvent e) {
+        Set<Material> uniqueMaterials = new HashSet<>();
+        boolean doNotRewardTE = false;
+        int blockCount = 0;
+
+        for (Item item : e.getItems()) {
+            Material m = item.getItemStack().getType();
+            uniqueMaterials.add(m);
+            if (m.isBlock()) {
+                blockCount++;
+            }
+        }
+        if (uniqueMaterials.size() > 1) {
+            doNotRewardTE = true;
+        }
+        int bonus = 0;
+        if (blockCount <= 1) {
+            for (Item item : e.getItems()) {
+                ItemStack is = new ItemStack(item.getItemStack());
+
+                if (is.getAmount() <= 0) continue;
+                if (!mcMMO.p.getGeneralConfig().getDoubleDropsEnabled(PrimarySkillType.MINING, is.getType())
+                        && !mcMMO.p.getGeneralConfig().getDoubleDropsEnabled(PrimarySkillType.HERBALISM, is.getType())
+                        && !mcMMO.p.getGeneralConfig().getDoubleDropsEnabled(PrimarySkillType.WOODCUTTING, is.getType()))
+                    continue;
+
+                if (doNotRewardTE) {
+                    if (!is.getType().isBlock()) {
+                        continue;
+                    }
+                }
+
+                if (!e.getBlock().getMetadata("mcMMO: Double Drops").isEmpty()) {
+                    BonusDropMeta bonusDropMeta = (BonusDropMeta) e.getBlock().getMetadata("mcMMO: Double Drops").get(0);
+                    int bonusCount = bonusDropMeta.asInt();
+
+                    for (int i = 0; i < bonusCount; i++) {
+                        if (is.getType() == Material.AIR || e.getBlockState().getLocation() == null) continue;
+                        bonus++;
+                    }
+                }
+            }
+        }
+        collect(e, e.getPlayer(), bonus);
+    }
+
+    private void collect(@NotNull BlockDropItemEvent e, Player p, int bonus) {
+        boolean check = false;
         List<Item> toRemove = new ArrayList<>();
         for (Item item : e.getItems()) {
-            if (item.getItemStack().hasItemMeta()) return;
-            Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(e.getPlayer().getInventory(), item.getItemStack());
+            if (item.getItemStack().hasItemMeta()) continue;
+            Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(p.getInventory(), item.getItemStack());
             if (storageBox == null) return;
-            long amount = item.getItemStack().getAmount();
             e.setCancelled(true);
-            item.getItemStack().setAmount(0);
+            check = true;
+            long amount = item.getItemStack().getAmount();
             item.remove();
 //            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.9F);
-            storageBox.getValue().setAmount(storageBox.getValue().getAmount() + amount);
-            e.getPlayer().getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
+            storageBox.getValue().setAmount(storageBox.getValue().getAmount() + amount + bonus);
+            p.getInventory().setItem(storageBox.getKey(), storageBox.getValue().getItemStack());
             toRemove.add(item);
         }
         e.getItems().removeAll(toRemove);
+        if (e.getBlock().hasMetadata("mcMMO: Double Drops") && check)
+            e.getBlock().removeMetadata("mcMMO: Double Drops", getPlugin(mcMMO.class));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBlockDispense(BlockDispenseEvent e) {
+    public void onBlockDispense(@NotNull BlockDispenseEvent e) {
         if (StorageBox.getStorageBox(e.getItem()) != null) e.setCancelled(true);
     }
 
-    private static ItemStack n(ItemStack item) {
+    @Contract("null -> new; !null -> param1")
+    private static @NotNull ItemStack n(ItemStack item) {
         return item == null ? new ItemStack(Material.AIR) : item;
     }
 
     @EventHandler
-    public void onPrepareItemCraft(PrepareItemCraftEvent e) {
+    public void onPrepareItemCraft(@NotNull PrepareItemCraftEvent e) {
         ItemStack[] matrix = e.getInventory().getMatrix();
         if (matrix.length == 9) {
             if (
                     n(matrix[0]).getType() == Material.DIAMOND && n(matrix[1]).getType() == Material.DIAMOND && n(matrix[2]).getType() == Material.DIAMOND
-                    && n(matrix[3]).getType() == Material.DIAMOND && n(matrix[4]).getType() == Material.CHEST && n(matrix[5]).getType() == Material.DIAMOND
-                    && n(matrix[6]).getType() == Material.DIAMOND && n(matrix[7]).getType() == Material.DIAMOND && n(matrix[8]).getType() == Material.DIAMOND
+                            && n(matrix[3]).getType() == Material.DIAMOND && n(matrix[4]).getType() == Material.CHEST && n(matrix[5]).getType() == Material.DIAMOND
+                            && n(matrix[6]).getType() == Material.DIAMOND && n(matrix[7]).getType() == Material.DIAMOND && n(matrix[8]).getType() == Material.DIAMOND
             ) {
                 e.getInventory().setResult(StorageBox.getNewStorageBox().getItemStack());
                 return;
@@ -178,7 +234,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
+    public void onInventoryClick(@NotNull InventoryClickEvent e) {
         if (e.getWhoClicked().getGameMode() == GameMode.CREATIVE) return;
         if (e.getClickedInventory() == null) return;
         if (e.getCurrentItem() == null || e.getCurrentItem().getType().isAir()) return;
@@ -205,7 +261,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         }
     }*/
 
-    public static int getEmptySlots(Player p) {
+    public static int getEmptySlots(@NotNull Player p) {
         ItemStack[] cont = p.getInventory().getContents();
         int i = 0;
         for (ItemStack item : cont) if (item == null || item.getType() == Material.AIR) i++;
@@ -217,7 +273,22 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         return i;
     }
 
-    public static StorageBoxPlugin getInstance() {
+    public static @NotNull StorageBoxPlugin getInstance() {
         return getPlugin(StorageBoxPlugin.class);
+    }
+
+    @Contract(pure = true)
+    private @NotNull List<ItemSpawnReason> getReasons() {
+        return Arrays.asList(
+                ItemSpawnReason.BONUS_DROPS,
+                ItemSpawnReason.TREE_FELLER_DISPLACED_BLOCK,
+                ItemSpawnReason.EXCAVATION_TREASURE);
+    }
+
+    private boolean shouldCollectReasons(ItemSpawnReason reason) {
+        for (ItemSpawnReason r : getReasons()) {
+            if (r.equals(reason)) return true;
+        }
+        return false;
     }
 }
