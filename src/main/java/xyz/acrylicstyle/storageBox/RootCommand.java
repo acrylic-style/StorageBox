@@ -5,15 +5,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import xyz.acrylicstyle.storageBox.commands.AutoCollectCommand;
-import xyz.acrylicstyle.storageBox.commands.BypassCommand;
-import xyz.acrylicstyle.storageBox.commands.ChangeTypeCommand;
-import xyz.acrylicstyle.storageBox.commands.CollectCommand;
-import xyz.acrylicstyle.storageBox.commands.ConvertStorageBoxCommand;
-import xyz.acrylicstyle.storageBox.commands.ExtractCommand;
-import xyz.acrylicstyle.storageBox.commands.NewCommand;
-import xyz.acrylicstyle.storageBox.commands.SetAmountCommand;
-import xyz.acrylicstyle.storageBox.commands.SetTypeCommand;
+import org.jetbrains.annotations.NotNull;
+import xyz.acrylicstyle.storageBox.commands.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +14,7 @@ import java.util.List;
 
 public class RootCommand implements CommandExecutor {
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("hi");
             return true;
@@ -52,6 +45,10 @@ public class RootCommand implements CommandExecutor {
             SetAmountCommand.onCommand(player, slicedArgs);
         } else if (args[0].equalsIgnoreCase("settype") && player.hasPermission("storagebox.op")) {
             SetTypeCommand.onCommand(player, slicedArgs);
+        } else if (args[0].equalsIgnoreCase("sell")) {
+            SellCommand.onCommand(player, slicedArgs);
+        } else if (args[0].equalsIgnoreCase("buy")) {
+            BuyCommand.onCommand(player, slicedArgs);
         } else {
             sendHelp(sender);
         }
@@ -64,8 +61,10 @@ public class RootCommand implements CommandExecutor {
         sender.sendMessage(help("changetype", "StorageBoxのアイテムの中身を変えます。オフハンドに変更先のアイテムを持ってください。"));
         sender.sendMessage(help("collect", "手に持ってるStorage Boxにインベントリに入ってるブロックを収納します。"));
         sender.sendMessage(help("convert", "Storage Boxの種類を変換します。"));
-        sender.sendMessage(help("extract <amount>", "アイテムをStorage Boxから取り出します。"));
+        sender.sendMessage(help("extract <数>", "アイテムをStorage Boxから取り出します。"));
         sender.sendMessage(help("new", "新しいStorage Boxを作成します。"));
+        sender.sendMessage(help("sell [数]", "アイテムを売ります。"));
+        sender.sendMessage(help("buy [数]", "アイテムを買います。"));
         if (sender.hasPermission("storagebox.op")) {
             sender.sendMessage(help("bypass", "アイテムチェックなどを無視します。[OP]"));
             sender.sendMessage(help("setamount <amount>", "アイテムの数を設定します。[OP]"));

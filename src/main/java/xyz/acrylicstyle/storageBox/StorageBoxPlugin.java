@@ -3,6 +3,7 @@ package xyz.acrylicstyle.storageBox;
 import com.gmail.nossr50.datatypes.meta.BonusDropMeta;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.mcMMO;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
@@ -21,6 +22,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -274,5 +276,10 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     public static @NotNull StorageBoxPlugin getInstance() {
         return getPlugin(StorageBoxPlugin.class);
+    }
+
+    public static @NotNull Economy getEconomy() {
+        RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
+        return Objects.requireNonNull(provider).getProvider();
     }
 }
