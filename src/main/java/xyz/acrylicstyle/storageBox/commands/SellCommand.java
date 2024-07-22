@@ -15,7 +15,7 @@ public class SellCommand {
             return;
         }
         long price = StorageBoxPlugin.getInstance().getConfig().getLong("sellPrices." + storageBox.getType().name());
-        if (price == 0) {
+        if (price == 0 || storageBox.getTag() != null) {
             player.sendMessage(ChatColor.RED + "このアイテムは売れません。");
             return;
         }

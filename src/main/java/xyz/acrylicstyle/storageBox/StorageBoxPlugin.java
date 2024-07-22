@@ -6,6 +6,7 @@ import com.gmail.nossr50.mcMMO;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,19 +57,6 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    /*
-    @Override
-    public void onDisable() {
-        LOGGER.info("Saving config");
-        try {
-            getConfig().save(new File("./plugins/StorageBox/config.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        LOGGER.info("Saved config");
-    }
-    */
-
     public void run(Runnable runnable) { Bukkit.getScheduler().runTask(this, runnable); }
 
     public void runAsync(Runnable runnable) { Bukkit.getScheduler().runTaskAsynchronously(this, runnable); }
@@ -104,6 +92,9 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 processing = false;
             }
             if (!event.isCancelled()) {
+                if (placedState instanceof Container) {
+                    ((Container) placedState).setCustomName(storageBox.getComponentItemStackDisplayName());
+                }
                 placedState.update(true, true);
             }
         });
@@ -113,7 +104,6 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public void onPlayerAttemptPickupItem(@NotNull EntityPickupItemEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
-        if (e.getItem().getItemStack().hasItemMeta()) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
         Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(player.getInventory(), e.getItem().getItemStack());
         if (storageBox == null) return;
@@ -177,7 +167,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         boolean check = false;
         List<Item> toRemove = new ArrayList<>();
         for (Item item : e.getItems()) {
-            if (item.getItemStack().hasItemMeta()) continue;
+            //if (item.getItemStack().hasItemMeta()) continue;
             Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(p.getInventory(), item.getItemStack());
             if (storageBox == null) return;
             e.setCancelled(true);
@@ -226,7 +216,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onCraftItem(CraftItemEvent e) {
-        if (StorageBox.getStorageBox(e.getInventory().getResult()) != null) {
+        if (e.getInventory().getResult() != null && StorageBox.getStorageBox(e.getInventory().getResult()) != null) {
             e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムの種類を設定するには、設定したいものをオフハンドに持ったうえで" + ChatColor.YELLOW + "/sb changetype" + ChatColor.GREEN + "を実行してください。");
             e.getWhoClicked().sendMessage(ChatColor.GREEN + "アイテムを取り出すには" + ChatColor.YELLOW + "/sb extract <数>" + ChatColor.GREEN + "を実行してください。");
             e.getWhoClicked().sendMessage(ChatColor.GREEN + "自動収集をオフにするには" + ChatColor.YELLOW + "/sb autocollect" + ChatColor.GREEN + "を実行してください。");
@@ -251,16 +241,6 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
             }
         }
     }
-
-    /* // disabled because it sucks
-    @EventHandler
-    public void onInventoryOpen(InventoryOpenEvent e) {
-        if (e.getInventory().getType() == InventoryType.CHEST) {
-            StorageBox storageBox = StorageBox.getStorageBox(e.getPlayer().getInventory().getItemInMainHand());
-            if (CollectCommand.fillTo(storageBox, e.getInventory())) return;
-            e.getPlayer().getInventory().setItemInMainHand(StorageBoxUtils.updateStorageBox(e.getPlayer().getInventory().getItemInMainHand()));
-        }
-    }*/
 
     public static int getEmptySlots(@NotNull Player p) {
         ItemStack[] cont = p.getInventory().getContents();

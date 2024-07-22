@@ -8,13 +8,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StorageBox {
@@ -30,25 +28,28 @@ public class StorageBox {
     }
 
     private boolean autoCollect;
-    private Material type;
+    private @Nullable Material type;
     private long amount;
+    private @Nullable NBTTagCompound tag;
     private final @Nullable UUID randomUUID;
 
-    public StorageBox(Material type, long amount) {
-        this.type = type;
-        this.amount = amount;
-        this.autoCollect = true;
-        this.randomUUID = null;
+    public StorageBox(@Nullable Material type, long amount) {
+        this(type, amount, true, null, null);
     }
 
-    public StorageBox(Material type, long amount, boolean autoCollect, @Nullable UUID randomUUID) {
+    public StorageBox(@Nullable Material type, long amount, boolean autoCollect, @Nullable UUID randomUUID) {
+        this(type, amount, autoCollect, null, randomUUID);
+    }
+
+    public StorageBox(@Nullable Material type, long amount, boolean autoCollect, @Nullable NBTTagCompound tag, @Nullable UUID randomUUID) {
         this.type = type;
         this.amount = amount;
         this.autoCollect = autoCollect;
+        this.tag = tag;
         this.randomUUID = randomUUID;
     }
 
-    public static StorageBox getStorageBox(ItemStack itemStack) {
+    public static @Nullable StorageBox getStorageBox(@NotNull ItemStack itemStack) {
         try {
             NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
             if (!tag.hasKey("storageBoxType")) {
@@ -58,78 +59,167 @@ public class StorageBox {
             Material type = Material.valueOf(s.isEmpty() || s.equals("null") ? "AIR" : s.toUpperCase());
             long amount = tag.getLong("storageBoxAmount");
             boolean autoCollect = tag.getBoolean("storageBoxAutoCollect");
+            NBTTagCompound storageBoxTag = tag.getCompound("storageBoxTag");
+            if (storageBoxTag.hasKey("storageBoxAmount")) {
+                throw new IllegalArgumentException("StorageBox cannot contain StorageBox");
+            }
+            if (storageBoxTag.isEmpty()) storageBoxTag = null;
             UUID randomUUID = UUID.fromString(tag.getString("randomUUID"));
-            return new StorageBox(type, amount, autoCollect, randomUUID);
+            return new StorageBox(type, amount, autoCollect, storageBoxTag, randomUUID);
         } catch (RuntimeException e) {
             return null;
         }
     }
 
-    public static StorageBox getNewStorageBox() { return getNewStorageBox(null); }
+    public static StorageBox getNewStorageBox() {
+        return getNewStorageBox(null);
+    }
 
-    public static StorageBox getNewStorageBox(Material type) { return getNewStorageBox(type, 0); }
+    public static StorageBox getNewStorageBox(Material type) {
+        return getNewStorageBox(type, 0);
+    }
 
-    public static StorageBox getNewStorageBox(Material type, long amount) { return new StorageBox(type, amount); }
+    public static StorageBox getNewStorageBox(Material type, long amount) {
+        return new StorageBox(type, amount);
+    }
 
-    public ItemStack getItemStack() {
+    public static @NotNull StorageBox wrapWithStorageBox(@NotNull ItemStack stack) {
+        NBTTagCompound tag = CraftItemStack.asNMSCopy(stack).getTag();
+        if (tag != null && tag.isEmpty()) tag = null;
+        return new StorageBox(stack.getType(), stack.getAmount(), true, tag, null);
+    }
+
+    public @Nullable ItemStack getComponentItemStack() {
+        ItemStack stack = new ItemStack(type == null ? Material.AIR : type);
+        if (type.isAir() || tag == null) return stack;
+        net.minecraft.server.v1_15_R1.ItemStack nms = CraftItemStack.asNMSCopy(stack);
+        nms.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nms);
+    }
+
+    public @NotNull String getComponentItemStackName() {
+        if (type == null || type.isAir()) return "空";
+        ItemStack stack = getComponentItemStack();
+        if (Objects.requireNonNull(stack).hasItemMeta() && Objects.requireNonNull(stack.getItemMeta()).hasDisplayName()) {
+            return Objects.requireNonNull(stack.getItemMeta()).getDisplayName();
+        }
+        String name = type.name().replaceAll("_", " ").toLowerCase();
+        return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+    }
+
+    public @Nullable String getComponentItemStackDisplayName() {
+        if (type == null || type.isAir()) return null;
+        ItemStack stack = getComponentItemStack();
+        if (Objects.requireNonNull(stack).hasItemMeta() && Objects.requireNonNull(stack.getItemMeta()).hasDisplayName()) {
+            return Objects.requireNonNull(stack.getItemMeta()).getDisplayName();
+        }
+        return null;
+    }
+
+    public boolean isComponentItemStackSimilar(@Nullable ItemStack stack) {
+        if (stack == null) return false;
+        return stack.isSimilar(getComponentItemStack());
+    }
+
+    public @NotNull ItemStack getItemStack() {
         Material itemType = getType() == null ? Material.BARRIER : getType();
         if (!itemType.isBlock() && !opaqueExempt.contains(itemType)) {
             itemType = Material.STICK;
         }
+        String id = randomUUID != null ? randomUUID.toString() : UUID.randomUUID().toString();
         ItemStack item = new ItemStack(itemType);
+        net.minecraft.server.v1_15_R1.ItemStack is = CraftItemStack.asNMSCopy(item);
+        NBTTagCompound tag = is.getOrCreateTag();
+        if (this.tag != null) {
+            tag.a(this.tag); // merge (for BlockState)
+            tag.set("storageBoxTag", this.tag);
+        }
+        tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
+        tag.setLong("storageBoxAmount", this.amount);
+        tag.setBoolean("storageBoxAutoCollect", this.autoCollect);
+        tag.setString("randomUUID", id);
+        is.setTag(tag);
+        item = CraftItemStack.asBukkitCopy(is);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             throw new RuntimeException("ItemMeta is null");
         }
-        String name;
-        if (getType() == null) {
-            name = "空";
-        } else {
-            name = getType().name().replaceAll("_", " ").toLowerCase();
-            name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-        }
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Storage Box " + ChatColor.YELLOW + "[" + ChatColor.WHITE + name + ChatColor.YELLOW + "] " + ChatColor.GRAY + "<" + this.amount + ">");
-        String id = randomUUID != null ? randomUUID.toString() : UUID.randomUUID().toString();
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + amount, ChatColor.GRAY + "AutoCollect: " + autoCollect, ChatColor.GRAY + "ID: " + id));
+        meta.setDisplayName("§dStorage Box §e[§f" + getComponentItemStackName() + "§r§e] §7<" + this.amount + ">");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY + "Amount: " + amount,
+                ChatColor.GRAY + "AutoCollect: " + autoCollect,
+                ChatColor.GRAY + "HasTag: " + (getTag() != null),
+                ChatColor.GRAY + "ID: " + id
+        ));
         meta.setCustomModelData(StorageBoxPlugin.customModelData);
         if (amount > 0) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
-        net.minecraft.server.v1_15_R1.ItemStack is = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound tag = is.getOrCreateTag();
-        tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
-        tag.setLong("storageBoxAmount", this.amount);
-        tag.setBoolean("storageBoxAutoCollect", this.autoCollect);
-        tag.setString("randomUUID", id);
-        is.setTag(tag);
-        return CraftItemStack.asBukkitCopy(is);
+        return item;
     }
 
-    public void setAmount(long amount) { this.amount = amount; }
+    public void setAmount(long amount) {
+        this.amount = amount;
+    }
 
-    public void increaseAmount() { setAmount(amount + 1); }
+    public void increaseAmount() {
+        setAmount(amount + 1);
+    }
 
-    public void decreaseAmount() { setAmount(amount - 1); }
+    public void decreaseAmount() {
+        setAmount(amount - 1);
+    }
 
     /**
      * Get material of this storage box.
      * @return Null if undefined, material otherwise.
      */
-    public Material getType() { return type == null || type.isAir() ? null : type; }
+    public @Nullable Material getType() {
+        return type == null || type.isAir() ? null : type;
+    }
 
     /**
      * Set material of this storage box.
      * @param type Null if undefined, material otherwise.
      */
-    public void setType(Material type) { this.type = type; }
+    public void setType(@Nullable Material type) {
+        this.type = type;
+    }
 
-    public long getAmount() { return amount; }
+    public long getAmount() {
+        return amount;
+    }
 
-    public boolean isEmpty() { return amount <= 0; }
+    public @Nullable NBTTagCompound getTag() {
+        return tag;
+    }
 
-    public boolean isAutoCollect() { return autoCollect; }
+    public void setTag(@Nullable NBTTagCompound tag) {
+        if (tag != null && tag.hasKey("storageBoxAmount")) {
+            throw new IllegalArgumentException("StorageBox cannot contain StorageBox");
+        }
+        this.tag = tag;
+    }
 
-    public void setAutoCollect(boolean autoCollect) { this.autoCollect = autoCollect; }
+    public boolean isEmpty() {
+        return amount <= 0;
+    }
+
+    public boolean isAutoCollect() {
+        return autoCollect;
+    }
+
+    public void setAutoCollect(boolean autoCollect) {
+        this.autoCollect = autoCollect;
+    }
+
+    public void importComponent(@NotNull ItemStack stack) {
+        NBTTagCompound tag = CraftItemStack.asNMSCopy(stack).getTag();
+        if (tag != null && tag.isEmpty()) tag = null;
+        this.setTag(tag);
+        this.type = stack.getType();
+        this.amount = stack.getAmount();
+    }
 }

@@ -15,7 +15,7 @@ public class BuyCommand {
             return;
         }
         long price = StorageBoxPlugin.getInstance().getConfig().getLong("buyPrices." + storageBox.getType().name());
-        if (price == 0) {
+        if (price == 0 || storageBox.getTag() != null) {
             player.sendMessage(ChatColor.RED + "このアイテムは買えません。");
             return;
         }

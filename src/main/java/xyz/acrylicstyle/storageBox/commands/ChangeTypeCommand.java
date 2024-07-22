@@ -39,10 +39,10 @@ public class ChangeTypeCommand {
             player.sendMessage(ChatColor.RED + "オフハンドに変更先のアイテムを持ってからもう一度実行してください。");
             return;
         }
-        if (offHand.getType().name().contains("SHULKER") || offHand.hasItemMeta()) {
-            player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
-            return;
-        }
+//        if (offHand.getType().name().contains("SHULKER")) {
+//            player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
+//            return;
+//        }
         ItemStack mainHand = player.getInventory().getItemInMainHand();
         StorageBox storageBox = StorageBox.getStorageBox(mainHand);
         if (storageBox == null) {
@@ -56,8 +56,7 @@ public class ChangeTypeCommand {
             return;
         }
         player.getInventory().setItemInOffHand(null);
-        storageBox.setType(offHand.getType());
-        storageBox.setAmount(offHand.getAmount());
+        storageBox.importComponent(offHand);
         player.getInventory().setItemInMainHand(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "Storage Boxのアイテムの種類を変更しました。");
     }

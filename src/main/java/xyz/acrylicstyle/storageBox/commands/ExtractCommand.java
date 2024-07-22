@@ -6,6 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
+import java.util.Objects;
+
 public class ExtractCommand {
     public static void onCommand(Player player, String[] args) {
         StorageBox storageBox = StorageBox.getStorageBox(player.getInventory().getItemInMainHand());
@@ -37,9 +39,10 @@ public class ExtractCommand {
         if (StorageBoxPlugin.getEmptySlots(player) >= i) {
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];
-            assert storageBox.getType() != null;
             for (int j = 0; j < i; j++) {
-                items[j] = new ItemStack(storageBox.getType(), ((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
+                ItemStack item = Objects.requireNonNull(storageBox.getComponentItemStack());
+                item.setAmount(((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
+                items[j] = item;
             }
             player.getInventory().addItem(items).values().forEach(is -> player.getWorld().dropItem(player.getLocation(), is));
             player.sendMessage(ChatColor.GREEN + "アイテムを" + ChatColor.RED + amount + ChatColor.GREEN + "個取り出しました。");

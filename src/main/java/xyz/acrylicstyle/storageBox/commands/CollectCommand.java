@@ -25,7 +25,7 @@ public class CollectCommand {
             ItemStack is = c[i];
             if (is == null) continue;
             if (StorageBox.getStorageBox(is) != null) continue;
-            if (is.getType().equals(storageBox.getType()) && new ItemStack(is.getType()).isSimilar(is)) {
+            if (storageBox.isComponentItemStackSimilar(is)) {
                 storageBox.setAmount(storageBox.getAmount() + is.getAmount());
                 inventory.setItem(i, null);
             }
