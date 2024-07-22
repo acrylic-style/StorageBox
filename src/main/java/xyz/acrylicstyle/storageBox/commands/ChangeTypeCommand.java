@@ -56,7 +56,12 @@ public class ChangeTypeCommand {
             return;
         }
         player.getInventory().setItemInOffHand(null);
-        storageBox.importComponent(offHand);
+        try {
+            storageBox.importComponent(offHand);
+        } catch (RuntimeException e) {
+            player.getInventory().setItemInOffHand(offHand);
+            player.sendMessage(ChatColor.RED + "エラーが発生しました。 (" + e.getMessage() + ")");
+        }
         player.getInventory().setItemInMainHand(storageBox.getItemStack());
         player.sendMessage(ChatColor.GREEN + "Storage Boxのアイテムの種類を変更しました。");
     }

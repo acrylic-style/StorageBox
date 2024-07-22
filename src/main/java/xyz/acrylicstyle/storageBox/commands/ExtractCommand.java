@@ -37,10 +37,11 @@ public class ExtractCommand {
         }
         int i = (int) Math.ceil(amount / 64F);
         if (StorageBoxPlugin.getEmptySlots(player) >= i) {
+            ItemStack stack = storageBox.getComponentItemStack();
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];
             for (int j = 0; j < i; j++) {
-                ItemStack item = Objects.requireNonNull(storageBox.getComponentItemStack());
+                ItemStack item = Objects.requireNonNull(stack);
                 item.setAmount(((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
                 items[j] = item;
             }

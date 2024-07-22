@@ -89,9 +89,13 @@ public class StorageBox {
         return new StorageBox(stack.getType(), stack.getAmount(), true, tag, null);
     }
 
+    /**
+     * Returns the containing item. Amount is always 1.
+     * @return the item
+     */
     public @Nullable ItemStack getComponentItemStack() {
         ItemStack stack = new ItemStack(type == null ? Material.AIR : type);
-        if (type.isAir() || tag == null) return stack;
+        if (type == null || type.isAir() || tag == null) return stack;
         net.minecraft.server.v1_15_R1.ItemStack nms = CraftItemStack.asNMSCopy(stack);
         nms.setTag(tag);
         return CraftItemStack.asBukkitCopy(nms);
@@ -162,6 +166,10 @@ public class StorageBox {
 
     public void setAmount(long amount) {
         this.amount = amount;
+        if (amount == 0) {
+            setTag(null);
+            setType(null);
+        }
     }
 
     public void increaseAmount() {
