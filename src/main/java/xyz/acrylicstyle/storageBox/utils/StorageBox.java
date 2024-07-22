@@ -137,6 +137,7 @@ public class StorageBox {
         if (this.tag != null) {
             tag.a(this.tag); // merge (for BlockState)
             tag.set("storageBoxTag", this.tag);
+            tag.remove("MYTHIC_TYPE");
         }
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.setLong("storageBoxAmount", this.amount);
