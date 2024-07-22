@@ -27,6 +27,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import xyz.acrylicstyle.storageBox.listener.MyPetListener;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
@@ -46,6 +47,9 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
         Bukkit.getPluginManager().registerEvents(this, this);
+        if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
+            Bukkit.getPluginManager().registerEvents(new MyPetListener(), this);
+        }
         try {
             ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
             recipe.shape("DDD", "DCD", "DDD");
