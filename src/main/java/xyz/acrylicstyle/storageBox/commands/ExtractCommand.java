@@ -41,7 +41,7 @@ public class ExtractCommand {
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];
             for (int j = 0; j < i; j++) {
-                ItemStack item = Objects.requireNonNull(stack);
+                ItemStack item = Objects.requireNonNull(stack).clone();
                 item.setAmount(((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
                 items[j] = item;
             }
