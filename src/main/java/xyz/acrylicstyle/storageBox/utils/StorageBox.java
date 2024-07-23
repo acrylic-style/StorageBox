@@ -136,8 +136,12 @@ public class StorageBox {
         NBTTagCompound tag = is.getOrCreateTag();
         if (this.tag != null) {
             tag.a(this.tag); // merge (for BlockState)
-            tag.set("storageBoxTag", this.tag);
+            tag.set("storageBoxTag", this.tag.clone());
             tag.remove("MYTHIC_TYPE");
+            tag.remove("AttributeModifiers");
+            tag.remove("display");
+            tag.remove("Enchantments");
+            tag.remove("CustomModelData");
         }
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.setLong("storageBoxAmount", this.amount);
@@ -167,10 +171,6 @@ public class StorageBox {
 
     public void setAmount(long amount) {
         this.amount = amount;
-        if (amount == 0) {
-            setTag(null);
-            setType(null);
-        }
     }
 
     public void increaseAmount() {
