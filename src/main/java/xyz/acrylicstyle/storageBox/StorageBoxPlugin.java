@@ -47,9 +47,6 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
         Bukkit.getPluginManager().registerEvents(this, this);
-        if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
-            Bukkit.getPluginManager().registerEvents(new MyPetListener(), this);
-        }
         try {
             ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
             recipe.shape("DDD", "DCD", "DDD");
@@ -59,6 +56,15 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         } catch (RuntimeException ex) {
             // ignore any "dupe recipe" error or something like that
         }
+
+        // delay init
+        Bukkit.getScheduler().runTask(this, () -> {
+            if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
+                Bukkit.getPluginManager().registerEvents(new MyPetListener(), this);
+            } else {
+                getLogger().info("MyPet is not enabled, skipping event registration");
+            }
+        });
     }
 
     public void run(Runnable runnable) { Bukkit.getScheduler().runTask(this, runnable); }
