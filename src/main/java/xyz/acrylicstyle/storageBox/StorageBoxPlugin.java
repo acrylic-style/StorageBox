@@ -97,7 +97,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 if (bracketLocation == -1) {
                     map.put(new ItemStack(Material.valueOf(key.toUpperCase())), section.getLong(key));
                 } else {
-                    String material = key.substring(0, bracketLocation - 1);
+                    String material = key.substring(0, bracketLocation);
                     String snbt = key.substring(bracketLocation);
                     NBTTagCompound tag = MojangsonParser.parse(snbt);
                     ItemStack stack = new ItemStack(Material.valueOf(material.toUpperCase()));
@@ -107,6 +107,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 }
             } catch (Exception e) {
                 getLogger().info("Failed to load " + path + "." + key);
+                e.printStackTrace();
             }
         }
     }

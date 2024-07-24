@@ -3,8 +3,11 @@ package xyz.acrylicstyle.storageBox.commands;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import xyz.acrylicstyle.storageBox.StorageBoxPlugin;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
+
+import java.util.Map;
 
 public class BuyCommand {
     public static void onCommand(Player player, String[] args) {
@@ -14,8 +17,17 @@ public class BuyCommand {
             player.sendMessage(ChatColor.RED + "Storage Boxを手に持ってからもう一度試してください。");
             return;
         }
-        long price = StorageBoxPlugin.getInstance().getConfig().getLong("buyPrices." + storageBox.getType().name());
-        if (price == 0 || storageBox.getTag() != null) {
+        ItemStack componentItemStack = storageBox.getComponentItemStack();
+        long price =
+                StorageBoxPlugin.getInstance()
+                        .buyPrices
+                        .entrySet()
+                        .stream()
+                        .filter(e -> e.getKey().isSimilar(componentItemStack))
+                        .findAny()
+                        .map(Map.Entry::getValue)
+                        .orElse(0L);
+        if (price == 0) {
             player.sendMessage(ChatColor.RED + "このアイテムは買えません。");
             return;
         }
