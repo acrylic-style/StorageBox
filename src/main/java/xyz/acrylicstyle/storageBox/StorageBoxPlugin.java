@@ -1,9 +1,13 @@
 package xyz.acrylicstyle.storageBox;
 
 import net.milkbowl.vault.economy.Economy;
+import net.minecraft.server.v1_15_R1.MojangsonParser;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,6 +27,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import xyz.acrylicstyle.storageBox.gui.ShopScreen;
 import xyz.acrylicstyle.storageBox.listener.McMMOListener;
 import xyz.acrylicstyle.storageBox.listener.MyPetListener;
 import xyz.acrylicstyle.storageBox.network.ChannelUtil;
@@ -30,21 +35,30 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 public class StorageBoxPlugin extends JavaPlugin implements Listener {
     public static Logger LOGGER;
     public static List<UUID> bypassingPlayers = new ArrayList<>();
     public static Integer customModelData = null;
+    public final Map<ItemStack, Long> buyPrices = new ConcurrentHashMap<>();
+    public final Map<ItemStack, Long> sellPrices = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
         LOGGER = getLogger();
         saveDefaultConfig();
         customModelData = (Integer) getConfig().get("custom-model-data");
+        loadPrices("buyPrices", buyPrices);
+        loadPrices("sellPrices", sellPrices);
+
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setTabCompleter(new StorageBoxTabCompleter());
         Objects.requireNonNull(Bukkit.getPluginCommand("storagebox")).setExecutor(new RootCommand());
+
         Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new ShopScreen.EventListener(), this);
+
         try {
             ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
             recipe.shape("DDD", "DCD", "DDD");
@@ -74,11 +88,42 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         });
     }
 
+    private void loadPrices(@NotNull String path, @NotNull Map<ItemStack, Long> map) {
+        ConfigurationSection section = getConfig().getConfigurationSection(path);
+        if (section == null) return;
+        for (String key : section.getKeys(false)) {
+            try {
+                int bracketLocation = key.indexOf('{');
+                if (bracketLocation == -1) {
+                    map.put(new ItemStack(Material.valueOf(key.toUpperCase())), section.getLong(key));
+                } else {
+                    String material = key.substring(0, bracketLocation - 1);
+                    String snbt = key.substring(bracketLocation);
+                    NBTTagCompound tag = MojangsonParser.parse(snbt);
+                    ItemStack stack = new ItemStack(Material.valueOf(material.toUpperCase()));
+                    net.minecraft.server.v1_15_R1.ItemStack nms = CraftItemStack.asNMSCopy(stack);
+                    nms.setTag(tag);
+                    map.put(CraftItemStack.asBukkitCopy(nms), section.getLong(key));
+                }
+            } catch (Exception e) {
+                getLogger().info("Failed to load " + path + "." + key);
+            }
+        }
+    }
+
     @Override
     public void onDisable() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             ChannelUtil.eject(player);
         }
+    }
+
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
+        customModelData = (Integer) getConfig().get("custom-model-data");
+        loadPrices("buyPrices", buyPrices);
+        loadPrices("sellPrices", sellPrices);
     }
 
     public void run(Runnable runnable) { Bukkit.getScheduler().runTask(this, runnable); }

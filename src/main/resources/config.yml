@@ -1,1 +1,6 @@
 custom-model-data: null
+storageBoxBuyPrice: 5000
+sellPrices:
+  STONE: 1
+buyPrices:
+  STONE: 100

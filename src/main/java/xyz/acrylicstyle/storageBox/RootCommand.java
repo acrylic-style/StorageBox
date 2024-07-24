@@ -49,6 +49,8 @@ public class RootCommand implements CommandExecutor {
             SellCommand.onCommand(player, slicedArgs);
         } else if (args[0].equalsIgnoreCase("buy")) {
             BuyCommand.onCommand(player, slicedArgs);
+        } else if (args[0].equalsIgnoreCase("shop")) {
+            ShopCommand.onCommand(player);
         } else {
             sendHelp(sender);
         }
@@ -65,6 +67,7 @@ public class RootCommand implements CommandExecutor {
         sender.sendMessage(help("new", "新しいStorage Boxを作成します。"));
         sender.sendMessage(help("sell [数]", "アイテムを売ります。"));
         sender.sendMessage(help("buy [数]", "アイテムを買います。"));
+        sender.sendMessage(help("shop", "StorageBoxを買います。"));
         if (sender.hasPermission("storagebox.op")) {
             sender.sendMessage(help("bypass", "アイテムチェックなどを無視します。[OP]"));
             sender.sendMessage(help("setamount <amount>", "アイテムの数を設定します。[OP]"));
