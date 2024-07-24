@@ -4,9 +4,9 @@ version: 1.15+1.4.0
 api-version: 1.15
 author: acrylic-style
 depend:
-  - mcMMO
   - Vault
 softdepend:
+  - mcMMO
   - MyPet
 commands:
   storagebox:
