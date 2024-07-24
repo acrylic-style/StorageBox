@@ -20,6 +20,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -28,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.storageBox.listener.MyPetListener;
+import xyz.acrylicstyle.storageBox.network.ChannelUtil;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
@@ -57,6 +59,10 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
             // ignore any "dupe recipe" error or something like that
         }
 
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            ChannelUtil.inject(this, player);
+        }
+
         // delay init
         Bukkit.getScheduler().runTask(this, () -> {
             if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
@@ -67,9 +73,21 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         });
     }
 
+    @Override
+    public void onDisable() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            ChannelUtil.eject(player);
+        }
+    }
+
     public void run(Runnable runnable) { Bukkit.getScheduler().runTask(this, runnable); }
 
     public void runAsync(Runnable runnable) { Bukkit.getScheduler().runTaskAsynchronously(this, runnable); }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        ChannelUtil.inject(this, e.getPlayer());
+    }
 
     private boolean processing = false;
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

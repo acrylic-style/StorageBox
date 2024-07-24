@@ -141,7 +141,6 @@ public class StorageBox {
             tag.remove("AttributeModifiers");
             tag.remove("display");
             tag.remove("Enchantments");
-            tag.remove("CustomModelData");
         }
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.setLong("storageBoxAmount", this.amount);
@@ -155,12 +154,15 @@ public class StorageBox {
         }
         meta.setDisplayName("§dStorage Box §e[§f" + getComponentItemStackName() + "§r§e] §7<" + this.amount + ">");
         meta.setLore(Arrays.asList(
-                ChatColor.GRAY + "Amount: " + amount,
-                ChatColor.GRAY + "AutoCollect: " + autoCollect,
-                ChatColor.GRAY + "HasTag: " + (getTag() != null),
+                ChatColor.GRAY + "数: " + amount,
+                ChatColor.GRAY + "自動回収: " + autoCollect,
+                ChatColor.GRAY + "NBTタグ: " + (getTag() != null),
+                ChatColor.GRAY + "不透明: " + (itemType == Material.STICK) + " (" + itemType + ")",
                 ChatColor.GRAY + "ID: " + id
         ));
-        meta.setCustomModelData(StorageBoxPlugin.customModelData);
+        if (type == null || type.isAir()) {
+            meta.setCustomModelData(StorageBoxPlugin.customModelData);
+        }
         if (amount > 0) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
