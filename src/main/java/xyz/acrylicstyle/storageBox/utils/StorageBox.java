@@ -141,6 +141,7 @@ public class StorageBox {
             tag.remove("AttributeModifiers");
             tag.remove("display");
             tag.remove("Enchantments");
+            tag.remove("CustomModelData");
         }
         tag.setString("storageBoxType", this.type == null ? "null" : this.type.name());
         tag.setLong("storageBoxAmount", this.amount);
