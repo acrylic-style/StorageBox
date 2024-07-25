@@ -174,6 +174,10 @@ public class StorageBox {
 
     public void setAmount(long amount) {
         this.amount = amount;
+        if (amount <= 0 && type == Material.EMERALD_BLOCK) {
+            type = null;
+            tag = null;
+        }
     }
 
     public void increaseAmount() {
