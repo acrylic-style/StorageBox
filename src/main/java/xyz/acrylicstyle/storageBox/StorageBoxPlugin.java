@@ -21,6 +21,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -134,6 +135,21 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         ChannelUtil.inject(this, e.getPlayer());
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (e.getPlayer().isOnline()) {
+                Inventory inventory = e.getPlayer().getInventory();
+                for (int i = 0; i < inventory.getSize(); i++) {
+                    ItemStack item = inventory.getItem(i);
+                    if (item == null) continue;
+                    if (StorageBox.getStorageBox(item) != null) {
+                        StorageBox storageBox = StorageBox.getStorageBox(item);
+                        if (storageBox != null) {
+                            inventory.setItem(i, storageBox.getItemStack());
+                        }
+                    }
+                }
+            }
+        }, 20 * 5);
     }
 
     private boolean processing = false;
