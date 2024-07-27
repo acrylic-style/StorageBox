@@ -1,13 +1,13 @@
 package xyz.acrylicstyle.storageBox;
 
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.server.v1_15_R1.MojangsonParser;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -102,9 +102,9 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 } else {
                     String material = key.substring(0, bracketLocation);
                     String snbt = key.substring(bracketLocation);
-                    NBTTagCompound tag = MojangsonParser.parse(snbt);
+                    CompoundTag tag = TagParser.parseTag(snbt);
                     ItemStack stack = new ItemStack(Material.valueOf(material.toUpperCase()));
-                    net.minecraft.server.v1_15_R1.ItemStack nms = CraftItemStack.asNMSCopy(stack);
+                    net.minecraft.world.item.ItemStack nms = CraftItemStack.asNMSCopy(stack);
                     nms.setTag(tag);
                     map.put(CraftItemStack.asBukkitCopy(nms), section.getLong(key));
                 }
@@ -185,8 +185,8 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 processing = false;
             }
             if (!event.isCancelled()) {
-                if (placedState instanceof Container) {
-                    ((Container) placedState).setCustomName(storageBox.getComponentItemStackDisplayName());
+                if (placedState instanceof Nameable nameable) {
+                    nameable.setCustomName(storageBox.getComponentItemStackDisplayName());
                 }
                 placedState.update(true, true);
             }
@@ -195,8 +195,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerAttemptPickupItem(@NotNull EntityPickupItemEvent e) {
-        if (!(e.getEntity() instanceof Player)) return;
-        Player player = (Player) e.getEntity();
+        if (!(e.getEntity() instanceof Player player)) return;
         if (StorageBox.getStorageBox(e.getItem().getItemStack()) != null) return;
         Map.Entry<Integer, StorageBox> storageBox = StorageBoxUtils.getStorageBoxForType(player.getInventory(), e.getItem().getItemStack());
         if (storageBox == null) return;

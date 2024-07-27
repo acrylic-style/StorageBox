@@ -1,52 +1,29 @@
 package xyz.acrylicstyle.storageBox.network;
 
+import com.mojang.datafixers.util.Pair;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
-
-import java.lang.reflect.Field;
-import java.util.List;
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
 
 public class PacketListener extends ChannelDuplexHandler {
-    private final EntityPlayer player;
-
-    public PacketListener(EntityPlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof PacketPlayInBlockPlace && ((PacketPlayInBlockPlace) msg).b() == net.minecraft.server.v1_15_R1.EnumHand.MAIN_HAND) {
-            ItemStack stack = player.b(((PacketPlayInBlockPlace) msg).b());
-            NBTTagCompound tag = stack.getTag();
-            if (tag != null && tag.hasKey("storageBoxType")) {
-                // restore item in hand
-                //ctx.write(new PacketPlayOutSetSlot(0, player.inventory.itemInHandIndex, player.inventory.getItemInHand()));
-            }
-        }
-        super.channelRead(ctx, msg);
-    }
-
-    @SuppressWarnings({"unchecked"})
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (msg instanceof PacketPlayOutWindowItems) {
-            Field field = PacketPlayOutWindowItems.class.getDeclaredField("b");
-            field.setAccessible(true);
-            for (ItemStack item : (List<ItemStack>) field.get(msg)) {
+        if (msg instanceof ClientboundContainerSetContentPacket packet) {
+            for (ItemStack item : packet.getItems()) {
                 rewriteItem(item);
             }
-        } else if (msg instanceof PacketPlayOutEntityEquipment) {
-            Field field = PacketPlayOutEntityEquipment.class.getDeclaredField("c");
-            field.setAccessible(true);
-            rewriteItem((ItemStack) field.get(msg));
-        } else if (msg instanceof PacketPlayOutSetSlot) {
-            Field field = PacketPlayOutSetSlot.class.getDeclaredField("c");
-            field.setAccessible(true);
-            rewriteItem((ItemStack) field.get(msg));
+            rewriteItem(packet.getCarriedItem());
+        } else if (msg instanceof ClientboundSetEquipmentPacket packet) {
+            for (Pair<EquipmentSlot, ItemStack> pair : packet.getSlots()) {
+                rewriteItem(pair.getSecond());
+            }
         }
         super.write(ctx, msg, promise);
     }
@@ -54,16 +31,16 @@ public class PacketListener extends ChannelDuplexHandler {
     @SuppressWarnings("deprecation")
     private static void rewriteItem(ItemStack item) {
         if (item == null) return;
-        NBTTagCompound tag = item.getTag();
+        CompoundTag tag = item.getTag();
         if (tag == null) return;
         try {
-            if (!tag.hasKey("storageBoxType") ||
+            if (!tag.contains("storageBoxType") ||
                     tag.getString("storageBoxType").isEmpty() ||
                     tag.getString("storageBoxType").equals("null")) {
                 return;
             }
-            if (tag.hasKey("storageBoxTag") && tag.getCompound("storageBoxTag").hasKey("CustomModelData")) {
-                tag.setInt("CustomModelData", tag.getCompound("storageBoxTag").getInt("CustomModelData"));
+            if (tag.contains("storageBoxTag") && tag.getCompound("storageBoxTag").contains("CustomModelData")) {
+                tag.putInt("CustomModelData", tag.getCompound("storageBoxTag").getInt("CustomModelData"));
             }
             Material material = Material.valueOf(tag.getString("storageBoxType"));
             if (material == Material.AIR) material = Material.BARRIER;
