@@ -17,7 +17,7 @@ import java.util.List;
 public class RootCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             if (args.length == 0) {
                 sender.sendMessage("/sb give <player>");
                 return true;
@@ -30,7 +30,6 @@ public class RootCommand implements CommandExecutor {
             }
             return true;
         }
-        Player player = (Player) sender;
         if (args.length == 0) {
             sendHelp(sender);
             return true;
