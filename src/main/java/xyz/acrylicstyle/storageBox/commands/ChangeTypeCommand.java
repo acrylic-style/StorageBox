@@ -12,25 +12,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ChangeTypeCommand {
-    private static final List<Material> WHITELIST = new ArrayList<>();
+    private static final List<Material> DISALLOW = new ArrayList<>();
 
     static {
-        WHITELIST.add(Material.COAL);
-        WHITELIST.add(Material.CHARCOAL);
-        WHITELIST.add(Material.DIAMOND);
-        WHITELIST.add(Material.EMERALD);
-        WHITELIST.add(Material.STICK);
-        WHITELIST.add(Material.DEBUG_STICK);
-        WHITELIST.add(Material.SUGAR);
-        WHITELIST.add(Material.STRING);
-        WHITELIST.add(Material.LAPIS_LAZULI);
-        WHITELIST.add(Material.WHEAT_SEEDS);
-        WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_DYE")).collect(Collectors.toList()));
-        WHITELIST.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("_INGOT")).collect(Collectors.toList()));
-        WHITELIST.add(Material.REDSTONE);
-        WHITELIST.add(Material.GLOWSTONE_DUST);
-        WHITELIST.add(Material.RED_MUSHROOM);
-        WHITELIST.add(Material.BROWN_MUSHROOM);
+        DISALLOW.addAll(Arrays.stream(Material.values()).filter(m -> m.name().endsWith("SHULKER_BOX")).collect(Collectors.toList()));
+        DISALLOW.add(Material.ELYTRA);
     }
 
     public static void onCommand(Player player) {
@@ -39,7 +25,7 @@ public class ChangeTypeCommand {
             player.sendMessage(ChatColor.RED + "オフハンドに変更先のアイテムを持ってからもう一度実行してください。");
             return;
         }
-        if (offHand.getType().name().contains("SHULKER")) {
+        if (DISALLOW.contains(offHand.getType())) {
             player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
             return;
         }
