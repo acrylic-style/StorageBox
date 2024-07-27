@@ -47,6 +47,7 @@ public class PacketListener extends ChannelDuplexHandler {
                 tag.setInt("CustomModelData", tag.getCompound("storageBoxTag").getInt("CustomModelData"));
             }
             Material material = Material.valueOf(tag.getString("storageBoxType"));
+            if (material == Material.AIR) material = Material.BARRIER;
             item.setItem(CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(material)).getItem());
         } catch (Exception e) {
             e.printStackTrace();
