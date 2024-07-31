@@ -11,6 +11,25 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 public class PacketListener extends ChannelDuplexHandler {
+    private final EntityPlayer player;
+
+    public PacketListener(EntityPlayer player) {
+        this.player = player;
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof PacketPlayInBlockPlace) {
+            ItemStack stack = player.b(((PacketPlayInBlockPlace) msg).b());
+            NBTTagCompound tag = stack.getTag();
+            if (tag != null && tag.hasKey("storageBoxType")) {
+                // restore item in hand
+                ctx.write(new PacketPlayOutSetSlot(0, player.inventory.itemInHandIndex, player.inventory.getItemInHand()));
+            }
+        }
+        super.channelRead(ctx, msg);
+    }
+
     @SuppressWarnings({"unchecked"})
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
