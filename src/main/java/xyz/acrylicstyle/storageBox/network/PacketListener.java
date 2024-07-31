@@ -19,7 +19,7 @@ public class PacketListener extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof PacketPlayInBlockPlace) {
+        if (msg instanceof PacketPlayInBlockPlace && ((PacketPlayInBlockPlace) msg).b() == net.minecraft.server.v1_15_R1.EnumHand.MAIN_HAND) {
             ItemStack stack = player.b(((PacketPlayInBlockPlace) msg).b());
             NBTTagCompound tag = stack.getTag();
             if (tag != null && tag.hasKey("storageBoxType")) {
