@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import xyz.acrylicstyle.storageBox.utils.ItemUtil;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
 import java.util.ArrayList;
@@ -26,6 +27,10 @@ public class ChangeTypeCommand {
             return;
         }
         if (DISALLOW.contains(offHand.getType())) {
+            player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
+            return;
+        }
+        if (ItemUtil.getStringTag(offHand, "MYTHIC_TYPE").startsWith("ffggmesi")) {
             player.sendMessage(ChatColor.RED + "このアイテムは格納できません。");
             return;
         }

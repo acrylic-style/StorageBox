@@ -1,6 +1,6 @@
 main: xyz.acrylicstyle.storageBox.StorageBoxPlugin
 name: StorageBox
-version: 1.15+1.4.0
+version: 1.15+1.5.5
 api-version: 1.15
 author: acrylic-style
 depend:
