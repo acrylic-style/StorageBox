@@ -22,8 +22,8 @@ public class ItemUtil {
 
     public static @NotNull String getStringTag(@NotNull ItemStack item, @NotNull String key) {
         if (item.getType().isAir()) return "";
-        net.minecraft.server.v1_15_R1.ItemStack nms = org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack.asNMSCopy(item);
-        net.minecraft.server.v1_15_R1.NBTTagCompound tag = nms.getTag();
+        net.minecraft.world.item.ItemStack nms = org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack.asNMSCopy(item);
+        net.minecraft.nbt.CompoundTag tag = nms.getTag();
         if (tag == null) return "";
         return tag.getString(key);
     }
