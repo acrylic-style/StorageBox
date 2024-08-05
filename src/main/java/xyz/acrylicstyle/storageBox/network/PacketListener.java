@@ -24,7 +24,7 @@ public class PacketListener extends ChannelDuplexHandler {
             NBTTagCompound tag = stack.getTag();
             if (tag != null && tag.hasKey("storageBoxType")) {
                 // restore item in hand
-                ctx.write(new PacketPlayOutSetSlot(0, player.inventory.itemInHandIndex, player.inventory.getItemInHand()));
+                //ctx.write(new PacketPlayOutSetSlot(0, player.inventory.itemInHandIndex, player.inventory.getItemInHand()));
             }
         }
         super.channelRead(ctx, msg);

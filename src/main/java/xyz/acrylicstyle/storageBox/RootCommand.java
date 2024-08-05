@@ -1,5 +1,6 @@
 package xyz.acrylicstyle.storageBox;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -7,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.storageBox.commands.*;
+import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +18,16 @@ public class RootCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("hi");
+            if (args.length == 0) {
+                sender.sendMessage("/sb give <player>");
+                return true;
+            }
+            if (args[0].equals("give")) {
+                Player player = Bukkit.getPlayerExact(args[1]);
+                if (player != null) {
+                    player.getInventory().addItem(StorageBox.getNewStorageBox().getItemStack());
+                }
+            }
             return true;
         }
         Player player = (Player) sender;

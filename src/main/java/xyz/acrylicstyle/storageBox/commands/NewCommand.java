@@ -9,6 +9,10 @@ import xyz.acrylicstyle.storageBox.utils.StorageBox;
 
 public class NewCommand {
     public static void onCommand(Player player) {
+        if (StorageBoxPlugin.getInstance().getConfig().getBoolean("disable-crafting", false)) {
+            player.sendMessage(ChatColor.RED + "このコマンドは無効化されています。");
+            return;
+        }
         if (!StorageBoxPlugin.bypassingPlayers.contains(player.getUniqueId())) {
             if (!player.getInventory().contains(new ItemStack(Material.DIAMOND, 8)) || !player.getInventory().contains(Material.CHEST, 1)) {
                 player.sendMessage(ChatColor.RED + "チェスト1個とダイヤ8個が必要です。");

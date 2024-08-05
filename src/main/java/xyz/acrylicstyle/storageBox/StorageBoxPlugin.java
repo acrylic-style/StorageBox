@@ -60,14 +60,16 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new ShopScreen.EventListener(), this);
 
-        try {
-            ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
-            recipe.shape("DDD", "DCD", "DDD");
-            recipe.setIngredient('D', Material.DIAMOND);
-            recipe.setIngredient('C', Material.CHEST);
-            Bukkit.addRecipe(recipe);
-        } catch (RuntimeException ex) {
-            // ignore any "dupe recipe" error or something like that
+        if (!getConfig().getBoolean("disable-crafting", false)) {
+            try {
+                ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "storage_box"), StorageBox.getNewStorageBox().getItemStack());
+                recipe.shape("DDD", "DCD", "DDD");
+                recipe.setIngredient('D', Material.DIAMOND);
+                recipe.setIngredient('C', Material.CHEST);
+                Bukkit.addRecipe(recipe);
+            } catch (RuntimeException ex) {
+                // ignore any "dupe recipe" error or something like that
+            }
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -219,6 +221,9 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPrepareItemCraft(@NotNull PrepareItemCraftEvent e) {
+        if (getConfig().getBoolean("disable-crafting", false)) {
+            return;
+        }
         ItemStack[] matrix = e.getInventory().getMatrix();
         if (matrix.length == 9) {
             if (
