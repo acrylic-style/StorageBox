@@ -16,11 +16,12 @@ public class ExtractCommand {
             player.sendMessage(ChatColor.RED + "Storage Boxを手に持ってからもう一度試してください。");
             return;
         }
+        int maxStackSize = storageBox.getComponentItemStack() == null ? 64 : storageBox.getComponentItemStack().getMaxStackSize();
         int amount;
         try {
             if (args.length == 0 || args[0].equalsIgnoreCase("all")) {
                 amount = (int) Math.min(storageBox.getAmount() > 1 ? storageBox.getAmount() - 1 : 1,
-                        StorageBoxPlugin.getEmptySlots(player) * 64L);
+                        StorageBoxPlugin.getEmptySlots(player) * (long) maxStackSize);
             } else {
                 amount = Integer.parseInt(args[0]);
             }
@@ -36,14 +37,14 @@ public class ExtractCommand {
             player.sendMessage(ChatColor.RED + "Storage Boxに入っているアイテムが足りません。");
             return;
         }
-        int i = (int) Math.ceil(amount / 64F);
+        int i = (int) Math.ceil(amount / (float) maxStackSize);
         if (StorageBoxPlugin.getEmptySlots(player) >= i) {
             ItemStack stack = storageBox.getComponentItemStack();
             storageBox.setAmount(storageBox.getAmount() - amount);
             ItemStack[] items = new ItemStack[i];
             for (int j = 0; j < i; j++) {
                 ItemStack item = Objects.requireNonNull(stack).clone();
-                item.setAmount(((j+1) == i) && (amount % 64 != 0) ? amount % 64 : 64);
+                item.setAmount(((j+1) == i) && (amount % maxStackSize != 0) ? amount % maxStackSize : maxStackSize);
                 items[j] = item;
             }
             player.getInventory().addItem(items).values().forEach(is -> player.getWorld().dropItem(player.getLocation(), is));
