@@ -22,6 +22,10 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
           server-id: acrylic-repo
+      - name: Install Spigot 1.15.2
+        run: |
+          wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+          java -jar BuildTools.jar --rev 1.15.2
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Prepare settings.xml
