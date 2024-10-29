@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - "ver/1.15"
     paths-ignore:
       - "**.md"
       - "renovate.json"
