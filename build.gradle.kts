@@ -7,7 +7,7 @@ plugins {
     `maven-publish`
 }
 
-group = "net.azisaba"
+group = "xyz.acrylicstyle"
 version = "1.5.6+1.20.2"
 
 java {
