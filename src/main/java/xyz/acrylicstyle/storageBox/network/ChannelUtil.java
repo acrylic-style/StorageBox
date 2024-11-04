@@ -14,7 +14,7 @@ public class ChannelUtil {
                     .connection
                     .channel
                     .pipeline()
-                    .addBefore("packet_handler", "azisaba_storagebox", new PacketListener(((CraftPlayer) player).getHandle()));
+                    .addBefore("packet_handler", "azisaba_storagebox", new PacketListener());
         } catch (Exception e) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 try {
@@ -24,7 +24,7 @@ public class ChannelUtil {
                             .connection
                             .channel
                             .pipeline()
-                            .addBefore("packet_handler", "azisaba_storagebox", new PacketListener(((CraftPlayer) player).getHandle()));
+                            .addBefore("packet_handler", "azisaba_storagebox", new PacketListener());
                 } catch (Exception e2) {
                     e2.addSuppressed(e);
                     e2.printStackTrace();
