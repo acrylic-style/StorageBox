@@ -1,9 +1,11 @@
 package xyz.acrylicstyle.storageBox.utils;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.component.CustomData;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -51,8 +53,8 @@ public class StorageBox {
 
     public static @Nullable StorageBox getStorageBox(@NotNull ItemStack itemStack) {
         try {
-            CompoundTag tag = CraftItemStack.asNMSCopy(itemStack).getOrCreateTag();
-            if (!tag.contains("storageBoxType")) {
+            CompoundTag tag = ItemUtil.getCustomData(itemStack);
+            if (tag == null || !tag.contains("storageBoxType")) {
                 return null;
             }
             String s = tag.getString("storageBoxType");
@@ -84,7 +86,7 @@ public class StorageBox {
     }
 
     public static @NotNull StorageBox wrapWithStorageBox(@NotNull ItemStack stack) {
-        CompoundTag tag = CraftItemStack.asNMSCopy(stack).getTag();
+        CompoundTag tag = ItemUtil.getCustomData(stack);
         if (tag != null && tag.isEmpty()) tag = null;
         return new StorageBox(stack.getType(), stack.getAmount(), true, tag, null);
     }
@@ -97,7 +99,7 @@ public class StorageBox {
         ItemStack stack = new ItemStack(type == null ? Material.AIR : type);
         if (type == null || type.isAir() || tag == null) return stack;
         net.minecraft.world.item.ItemStack nms = CraftItemStack.asNMSCopy(stack);
-        nms.setTag(tag);
+        nms.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         return CraftItemStack.asBukkitCopy(nms);
     }
 
@@ -132,8 +134,7 @@ public class StorageBox {
         }
         String id = randomUUID != null ? randomUUID.toString() : UUID.randomUUID().toString();
         ItemStack item = new ItemStack(itemType);
-        net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
-        CompoundTag tag = is.getOrCreateTag();
+        CompoundTag tag = new CompoundTag();
         if (this.tag != null) {
             tag.merge(this.tag); // for block state
             tag.put("storageBoxTag", this.tag.copy());
@@ -149,7 +150,8 @@ public class StorageBox {
         tag.putLong("storageBoxAmount", this.amount);
         tag.putBoolean("storageBoxAutoCollect", this.autoCollect);
         tag.putString("randomUUID", id);
-        is.setTag(tag);
+        net.minecraft.world.item.ItemStack is = CraftItemStack.asNMSCopy(item);
+        is.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         item = CraftItemStack.asBukkitCopy(is);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -167,7 +169,7 @@ public class StorageBox {
             meta.setCustomModelData(StorageBoxPlugin.customModelData);
         }
         if (amount > 0) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
@@ -234,7 +236,7 @@ public class StorageBox {
     }
 
     public void importComponent(@NotNull ItemStack stack) {
-        CompoundTag tag = CraftItemStack.asNMSCopy(stack).getTag();
+        CompoundTag tag = ItemUtil.getCustomData(stack);
         if (tag != null && tag.isEmpty()) tag = null;
         this.setTag(tag);
         this.type = stack.getType();

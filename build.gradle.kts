@@ -8,10 +8,10 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "1.20.2+1.5.6"
+version = "1.21.1+1.5.6"
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 
     withJavadocJar()
     withSourcesJar()
@@ -48,11 +48,11 @@ dependencies {
         exclude("org.bstats", "bstats-bukkit")
     }
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.1.196")
-    compileOnly("io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT")
-    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
 }
 
-paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.REOBF_PRODUCTION)
+paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRODUCTION)
 
 publishing {
     repositories {

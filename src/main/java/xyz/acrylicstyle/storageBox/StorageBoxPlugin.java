@@ -1,13 +1,15 @@
 package xyz.acrylicstyle.storageBox;
 
 import net.milkbowl.vault.economy.Economy;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.world.item.component.CustomData;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -105,7 +107,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                     CompoundTag tag = TagParser.parseTag(snbt);
                     ItemStack stack = new ItemStack(Material.valueOf(material.toUpperCase()));
                     net.minecraft.world.item.ItemStack nms = CraftItemStack.asNMSCopy(stack);
-                    nms.setTag(tag);
+                    nms.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     map.put(CraftItemStack.asBukkitCopy(nms), section.getLong(key));
                 }
             } catch (Exception e) {

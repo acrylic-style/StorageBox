@@ -4,17 +4,18 @@ import com.mojang.datafixers.util.Pair;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
 public class PacketListener extends ChannelDuplexHandler {
     @Override
@@ -35,8 +36,9 @@ public class PacketListener extends ChannelDuplexHandler {
     @SuppressWarnings("deprecation")
     private static void rewriteItem(ItemStack item) {
         if (item == null) return;
-        CompoundTag tag = item.getTag();
-        if (tag == null) return;
+        CustomData customData = item.get(DataComponents.CUSTOM_DATA);
+        if (customData == null) return;
+        CompoundTag tag = customData.copyTag();
         try {
             if (!tag.contains("storageBoxType") ||
                     tag.getString("storageBoxType").isEmpty() ||
