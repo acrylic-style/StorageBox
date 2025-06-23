@@ -14,7 +14,7 @@ public class NewCommand {
             return;
         }
         if (!StorageBoxPlugin.bypassingPlayers.contains(player.getUniqueId())) {
-            if (!player.getInventory().contains(new ItemStack(Material.DIAMOND, 8)) || !player.getInventory().contains(Material.CHEST, 1)) {
+            if (!hasAtLeast(player, Material.DIAMOND, 8) || !hasAtLeast(player, Material.CHEST, 1)) {
                 player.sendMessage(ChatColor.RED + "チェスト1個とダイヤ8個が必要です。");
                 return;
             }
@@ -27,5 +27,19 @@ public class NewCommand {
         player.sendMessage(ChatColor.GREEN + " - アイテムを取り出すには" + ChatColor.YELLOW + "/sb extract <数>" + ChatColor.GREEN + "を実行してください。");
         player.sendMessage(ChatColor.GREEN + " - 自動収集をオフにするには" + ChatColor.YELLOW + "/sb autocollect" + ChatColor.GREEN + "を実行してください。");
         player.sendMessage(ChatColor.GREEN + " - その他の使い方などは" + ChatColor.YELLOW + "/sb" + ChatColor.GREEN + "を見てください。");
+    }
+
+    @SuppressWarnings("ConstantValue") // In some version of spigot, the item stack might be null
+    private static boolean hasAtLeast(Player player, Material material, int amount) {
+        int count = 0;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item != null && item.getType() == material) {
+                count += item.getAmount();
+                if (count >= amount) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
