@@ -57,16 +57,16 @@ public class StorageBox {
             if (tag == null || !tag.contains("storageBoxType")) {
                 return null;
             }
-            String s = tag.getString("storageBoxType");
+            String s = tag.getString("storageBoxType").orElse("STONE");
             Material type = Material.valueOf(s.isEmpty() || s.equals("null") ? "AIR" : s.toUpperCase());
-            long amount = tag.getLong("storageBoxAmount");
-            boolean autoCollect = tag.getBoolean("storageBoxAutoCollect");
-            CompoundTag storageBoxTag = tag.getCompound("storageBoxTag");
+            long amount = tag.getLong("storageBoxAmount").orElse(0L);
+            boolean autoCollect = tag.getBoolean("storageBoxAutoCollect").orElse(false);
+            CompoundTag storageBoxTag = tag.getCompound("storageBoxTag").orElseGet(CompoundTag::new);
             if (storageBoxTag.contains("storageBoxAmount")) {
                 throw new IllegalArgumentException("StorageBox cannot contain StorageBox");
             }
             if (storageBoxTag.isEmpty()) storageBoxTag = null;
-            UUID randomUUID = UUID.fromString(tag.getString("randomUUID"));
+            UUID randomUUID = UUID.fromString(tag.getString("randomUUID").orElseGet(() -> UUID.randomUUID().toString()));
             return new StorageBox(type, amount, autoCollect, storageBoxTag, randomUUID);
         } catch (RuntimeException e) {
             return null;

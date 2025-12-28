@@ -8,9 +8,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -21,10 +18,10 @@ public class PacketListener extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof ClientboundContainerSetContentPacket packet) {
-            for (ItemStack item : packet.getItems()) {
+            for (ItemStack item : packet.items()) {
                 rewriteItem(item);
             }
-            rewriteItem(packet.getCarriedItem());
+            rewriteItem(packet.carriedItem());
         } else if (msg instanceof ClientboundSetEquipmentPacket packet) {
             for (Pair<EquipmentSlot, ItemStack> pair : packet.getSlots()) {
                 rewriteItem(pair.getSecond());
@@ -42,13 +39,13 @@ public class PacketListener extends ChannelDuplexHandler {
         try {
             if (!tag.contains("storageBoxType") ||
                     tag.getString("storageBoxType").isEmpty() ||
-                    tag.getString("storageBoxType").equals("null")) {
+                    tag.getString("storageBoxType").orElse("null").isEmpty()) {
                 return;
             }
-            if (tag.contains("storageBoxTag") && tag.getCompound("storageBoxTag").contains("CustomModelData")) {
-                tag.putInt("CustomModelData", tag.getCompound("storageBoxTag").getInt("CustomModelData"));
+            if (tag.contains("storageBoxTag") && tag.getCompound("storageBoxTag").orElseGet(CompoundTag::new).contains("CustomModelData")) {
+                tag.putInt("CustomModelData", tag.getCompound("storageBoxTag").orElseGet(CompoundTag::new).getInt("CustomModelData").orElse(0));
             }
-            Material material = Material.valueOf(tag.getString("storageBoxType"));
+            Material material = Material.valueOf(tag.getString("storageBoxType").orElse("AIR").toUpperCase());
             if (material == Material.AIR) material = Material.BARRIER;
             item.setItem(CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(material)).getItem());
         } catch (Exception e) {

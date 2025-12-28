@@ -2,38 +2,28 @@ import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
-    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     java
     `maven-publish`
 }
 
 group = "xyz.acrylicstyle"
-version = "1.5.6+1.21.1"
+version = "1.5.6+1.21.11"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 
-    withJavadocJar()
+    //withJavadocJar()
     withSourcesJar()
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
-    maven {
-        name = "papermc-repo"
-        url = uri("https://papermc.io/repo/repository/maven-public/")
-    }
-    maven {
-        name = "sonatype"
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-    maven {
-        name = "jitpack"
-        url = uri("https://jitpack.io")
-    }
-    maven { url = uri("https://nexus.neetgames.com/repository/maven-releases/") }
-    maven { url = uri("https://maven.enginehub.org/repo/") }
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://oss.sonatype.org/content/groups/public/")
+    maven("https://jitpack.io")
+    maven("https://nexus.neetgames.com/repository/maven-releases/")
+    maven("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
@@ -43,13 +33,15 @@ dependencies {
     }
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.0.0") {
         exclude("org.bstats", "bstats-bukkit")
+        exclude("org.bukkit", "bukkit")
     }
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.0") {
         exclude("org.bstats", "bstats-bukkit")
+        exclude("org.bukkit", "bukkit")
     }
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.1.196")
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
 paperweight.reobfArtifactConfiguration.set(ReobfArtifactConfiguration.MOJANG_PRODUCTION)

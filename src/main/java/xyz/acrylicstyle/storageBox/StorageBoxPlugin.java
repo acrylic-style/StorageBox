@@ -7,7 +7,6 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.world.item.component.CustomData;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -104,7 +103,7 @@ public class StorageBoxPlugin extends JavaPlugin implements Listener {
                 } else {
                     String material = key.substring(0, bracketLocation);
                     String snbt = key.substring(bracketLocation);
-                    CompoundTag tag = TagParser.parseTag(snbt);
+                    CompoundTag tag = TagParser.parseCompoundFully(snbt);
                     ItemStack stack = new ItemStack(Material.valueOf(material.toUpperCase()));
                     net.minecraft.world.item.ItemStack nms = CraftItemStack.asNMSCopy(stack);
                     nms.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));

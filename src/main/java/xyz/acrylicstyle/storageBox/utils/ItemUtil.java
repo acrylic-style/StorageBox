@@ -35,6 +35,6 @@ public class ItemUtil {
     public static @NotNull String getStringTag(@NotNull ItemStack item, @NotNull String key) {
         CompoundTag tag = getCustomData(item);
         if (tag == null) return "";
-        return tag.getString(key);
+        return tag.getString(key).orElse("");
     }
 }
